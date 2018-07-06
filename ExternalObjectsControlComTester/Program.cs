@@ -9,8 +9,16 @@ namespace ExternalObjectsControlComTester
     {
         static void Main(string[] args)
         {
-            IDistriObjsCtrl pCtrl = new DistriObjsCtrlClass();
-            pCtrl.CreateNetworkExternalObjectControl(0, 0);
+            try
+            {
+                IDistriObjsCtrl pCtrl = new DistriObjsCtrlClass();
+                pCtrl.CreateNetworkExternalObjectControl(1, 0);
+                pCtrl.ReleaseNetworkExternalObjectControl();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 }

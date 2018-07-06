@@ -7,6 +7,7 @@
 
 #include "ExternalObjectsControlCom_i.h"
 
+#include "LibExternalObjectIfNetwork.h"
 
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -24,7 +25,7 @@ class ATL_NO_VTABLE CDistriObjsCtrl :
 	public IDispatchImpl<IDistriObjsCtrl, &IID_IDistriObjsCtrl, &LIBID_ExternalObjectsControlComLib, /*wMajor =*/ 1, /*wMinor =*/ 0>
 {
 public:
-	CDistriObjsCtrl()
+	CDistriObjsCtrl() : m_pExternalCtrl(NULL)
 	{
 	}
 
@@ -47,14 +48,16 @@ END_COM_MAP()
 
 	void FinalRelease()
 	{
+		if (NULL != m_pExternalCtrl)
+			::ReleaseNetworkExternalObjectControl(m_pExternalCtrl);
+		m_pExternalCtrl = NULL;
 	}
 
 public:
-
-
-
 	STDMETHOD(CreateNetworkExternalObjectControl)(LONG imple, LONG terminal);
 	STDMETHOD(ReleaseNetworkExternalObjectControl)(void);
+private:
+	CVED::IExternalObjectControl* m_pExternalCtrl;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(DistriObjsCtrl), CDistriObjsCtrl)
