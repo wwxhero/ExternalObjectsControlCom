@@ -8,11 +8,29 @@ import "oaidl.idl";
 import "ocidl.idl";
 
 [
+	object,
+	uuid(180764CB-8BB2-47A2-92E3-B59AAA7A36B0),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IDistriObjsCtrl : IDispatch{
+	[id(1)] HRESULT CreateNetworkExternalObjectControl([in] LONG imple, [in] LONG terminal);
+	[id(2)] HRESULT ReleaseNetworkExternalObjectControl(void);
+};
+[
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),
 	version(1.0),
 ]
 library ExternalObjectsControlComLib
 {
 	importlib("stdole2.tlb");
+	[
+		uuid(C85543E5-7694-4B15-8C6B-ABB92AADA885)
+	]
+	coclass DistriObjsCtrl
+	{
+		[default] interface IDistriObjsCtrl;
+	};
 };
 

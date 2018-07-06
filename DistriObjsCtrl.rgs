@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {C85543E5-7694-4B15-8C6B-ABB92AADA885} = s 'DistriObjsCtrl Class'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{32C477E7-84FC-4F7A-96B9-4F86FA80DEE5}'
+			Version = s '1.0'
+		}
+	}
+}

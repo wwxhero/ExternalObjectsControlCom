@@ -5,6 +5,8 @@
 #include "ExternalObjectsControlCom_i.h"
 #include "dllmain.h"
 
+const TCHAR CExternalObjectsControlComModule::c_logSrc[] = _T("ExternalObjectsControlCom");
+
 CExternalObjectsControlComModule _AtlModule;
 
 // DLL Entry Point
