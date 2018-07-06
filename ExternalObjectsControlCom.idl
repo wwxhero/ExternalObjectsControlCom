@@ -17,6 +17,7 @@ import "ocidl.idl";
 interface IDistriObjsCtrl : IDispatch{
 	[id(1)] HRESULT CreateNetworkExternalObjectControl([in] LONG imple, [in] LONG terminal);
 	[id(2)] HRESULT ReleaseNetworkExternalObjectControl(void);
+	[id(3)] HRESULT Initialize([in] BSTR pathScene);
 };
 [
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),

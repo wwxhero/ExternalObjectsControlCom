@@ -58,6 +58,8 @@ public:
 	STDMETHOD(ReleaseNetworkExternalObjectControl)(void);
 private:
 	CVED::IExternalObjectControl* m_pExternalCtrl;
+public:
+	STDMETHOD(Initialize)(BSTR pathScene);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(DistriObjsCtrl), CDistriObjsCtrl)
