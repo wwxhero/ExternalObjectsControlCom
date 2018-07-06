@@ -1,0 +1,18 @@
+// ExternalObjectsControlCom.idl : IDL source for ExternalObjectsControlCom
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ExternalObjectsControlCom.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),
+	version(1.0),
+]
+library ExternalObjectsControlComLib
+{
+	importlib("stdole2.tlb");
+};
+
