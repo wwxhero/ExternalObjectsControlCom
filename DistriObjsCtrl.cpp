@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "DistriObjsCtrl.h"
 #include "dllmain.h"
+#include "CvedAdoCtrl.h"
 // CDistriObjsCtrl
 
 
@@ -34,7 +35,6 @@ STDMETHODIMP CDistriObjsCtrl::ReleaseNetworkExternalObjectControl(void)
 #endif
 	if (m_pExternalCtrl)
 	{
-		//m_pExternalCtrl->UnInitialize();
 		::ReleaseNetworkExternalObjectControl(m_pExternalCtrl);
 		m_pExternalCtrl = NULL;
 	}
@@ -45,9 +45,73 @@ STDMETHODIMP CDistriObjsCtrl::ReleaseNetworkExternalObjectControl(void)
 STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 {
 	// TODO: Add your implementation code here
+	if( m_pExternalCtrl )
+	{
+		::ReleaseNetworkExternalObjectControl(m_pExternalCtrl);
+		m_pExternalCtrl = NULL;
+	}
 	_bstr_t pathScene(a_pathScene, false);
+	std::string strPathScene((LPCTSTR)pathScene);
 	HRESULT hr = S_OK;
+	CSnoParserDistri parser;
+	bool Initialized = parser.ParseFile(strPathScene);
+	if (Initialized)
+	{
+		CSnoParser::TIterator pBlock = parser.Begin();
+		bool scenFileError = (
+				pBlock == parser.End() ||
+				pBlock->GetBlockName() != string( "Header" )
+				);
+		if( scenFileError )
+		{
+#ifdef _DEBUG
+			_AtlModule.LogEventEx(3, _T("File is incomplete, or first block is not the header."), EVENTLOG_WARNING_TYPE);
+#endif
+			hr = E_INVALIDARG;
+		}
+		else
+		{
+			CHeaderParseBlock* pHdrBlk = new CHeaderDistriParseBlock( *pBlock );
+			if (m_pCved) delete m_pCved;
+			m_pCved = new CVED::CCvedADOCtrl(m_pExternalCtrl);
+			//float   behavDeltaT = (float) (1.0f / 30.0f);			// behaviors execution period
+			//int     dynaMult = 2;				// how many times dynamics runs per behavior
+			//m_pCved->Configure(CVED::CCved::eCV_SINGLE_USER, behavDeltaT, dynaMult);
+			string cvedErr;
+			bool success = m_pCved->Init( pHdrBlk->GetLriFile(), cvedErr );
+			if( !success )
+			{
+#ifdef _DEBUG
+				CString strLog;
+				strLog.Format(_T("Cved::Init failed: %s"), cvedErr.c_str());
+				_AtlModule.LogEventEx(3, strLog, EVENTLOG_ERROR_TYPE);
+#endif
+				hr = E_UNEXPECTED;
+			}
+			else
+			{
+				Initialized = m_pExternalCtrl->Initialize(static_cast<CHeaderDistriParseBlock&>(*pHdrBlk), static_cast<CVED::CCvedDistri*>(m_pCved)); //the configuration for localhost simulator will be identified
+#ifdef _DEBUG
+				if (!Initialized)
+				{
+					CString strLog;
+					strLog.Format(_T("External Control Initialization failed"));
+					_AtlModule.LogEventEx(3, strLog, EVENTLOG_ERROR_TYPE);
+				}
+#endif
 
+			}
+		}
+
+		if (!Initialized)
+		{
+			::ReleaseNetworkExternalObjectControl(m_pExternalCtrl);
+			m_pExternalCtrl = NULL;
+			hr = E_FAIL;
+		}
+	}
+	else
+		 hr = E_INVALIDARG;
 #ifdef _DEBUG
 	CString strLog;
 	_com_error err(hr);
@@ -55,4 +119,18 @@ STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 	_AtlModule.LogEventEx(3, strLog);
 #endif
 	return hr;
+}
+
+
+STDMETHODIMP CDistriObjsCtrl::UnInitialize(void)
+{
+	// TODO: Add your implementation code here
+	if (m_pExternalCtrl)
+		m_pExternalCtrl->UnInitialize();
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("%s->Initialize(%s)"), NULL == m_pExternalCtrl ? "NULL" : "Not NULL");
+	_AtlModule.LogEventEx(4, strLog);
+#endif
+	return S_OK;
 }

@@ -31,6 +31,7 @@ namespace ExternalObjectsControlComTester
                 pCtrl.CreateNetworkExternalObjectControl(1, 0);
                 string scenePath = "E:\\Distri_NadsMiniSim_2.2.1\\data\\distri_demo_fhwa.scn";
                 pCtrl.Initialize(scenePath);
+                pCtrl.UnInitialize();
                 pCtrl.ReleaseNetworkExternalObjectControl();
             }
             catch (Exception e)

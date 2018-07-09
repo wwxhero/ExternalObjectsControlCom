@@ -26,6 +26,7 @@ class ATL_NO_VTABLE CDistriObjsCtrl :
 {
 public:
 	CDistriObjsCtrl() : m_pExternalCtrl(NULL)
+					  , m_pCved(NULL)
 	{
 	}
 
@@ -49,17 +50,20 @@ END_COM_MAP()
 	void FinalRelease()
 	{
 		if (NULL != m_pExternalCtrl)
+		{
 			::ReleaseNetworkExternalObjectControl(m_pExternalCtrl);
+		}
 		m_pExternalCtrl = NULL;
 	}
 
 public:
 	STDMETHOD(CreateNetworkExternalObjectControl)(LONG imple, LONG terminal);
 	STDMETHOD(ReleaseNetworkExternalObjectControl)(void);
+	STDMETHOD(Initialize)(BSTR pathScene);
+	STDMETHOD(UnInitialize)(void);
 private:
 	CVED::IExternalObjectControl* m_pExternalCtrl;
-public:
-	STDMETHOD(Initialize)(BSTR pathScene);
+	CVED::CCved*            m_pCved;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(DistriObjsCtrl), CDistriObjsCtrl)
