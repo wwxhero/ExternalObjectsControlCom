@@ -7,6 +7,14 @@
 import "oaidl.idl";
 import "ocidl.idl";
 
+enum EVT
+{
+    crtDyno = 0
+	, delDyno
+	, evtUndefined
+};
+
+
 [
 	object,
 	uuid(180764CB-8BB2-47A2-92E3-B59AAA7A36B0),
@@ -19,6 +27,14 @@ interface IDistriObjsCtrl : IDispatch{
 	[id(2)] HRESULT ReleaseNetworkExternalObjectControl(void);
 	[id(3)] HRESULT Initialize([in] BSTR pathScene);
 	[id(4)] HRESULT UnInitialize(void);
+	[id(5)] HRESULT QFrontEvent([out]enum EVT* evt, [out] VARIANT_BOOL* empty);
+	[id(6)] HRESULT QPopEvent();
+	[id(7)] HRESULT GetcrtDynoTuple([out] LONG* id_local, [out] BSTR* name, [out] LONG* solId
+									, [out] DOUBLE* xSize, [out] DOUBLE* ySize, [out] DOUBLE* zSize
+									, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
+									, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
+									, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
+	[id(8)] HRESULT GetdelDynoTuple([out] LONG* id_local);
 };
 [
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),

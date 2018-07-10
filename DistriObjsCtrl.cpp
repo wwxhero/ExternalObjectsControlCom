@@ -44,18 +44,14 @@ STDMETHODIMP CDistriObjsCtrl::ReleaseNetworkExternalObjectControl(void)
 
 STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 {
-	// TODO: Add your implementation code here
-	if( m_pExternalCtrl )
-	{
-		::ReleaseNetworkExternalObjectControl(m_pExternalCtrl);
-		m_pExternalCtrl = NULL;
-	}
+	// TODO: connect cved msg queue to external object control
+	ATLASSERT(NULL != m_pExternalCtrl);
 	_bstr_t pathScene(a_pathScene, false);
 	std::string strPathScene((LPCTSTR)pathScene);
 	HRESULT hr = S_OK;
 	CSnoParserDistri parser;
-	bool Initialized = parser.ParseFile(strPathScene);
-	if (Initialized)
+	bool initialized = parser.ParseFile(strPathScene);
+	if (initialized)
 	{
 		CSnoParser::TIterator pBlock = parser.Begin();
 		bool scenFileError = (
@@ -72,38 +68,22 @@ STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 		else
 		{
 			CHeaderParseBlock* pHdrBlk = new CHeaderDistriParseBlock( *pBlock );
-			if (m_pCved) delete m_pCved;
-			m_pCved = new CVED::CCvedADOCtrl(m_pExternalCtrl);
-			//float   behavDeltaT = (float) (1.0f / 30.0f);			// behaviors execution period
-			//int     dynaMult = 2;				// how many times dynamics runs per behavior
-			//m_pCved->Configure(CVED::CCved::eCV_SINGLE_USER, behavDeltaT, dynaMult);
-			string cvedErr;
-			bool success = m_pCved->Init( pHdrBlk->GetLriFile(), cvedErr );
-			if( !success )
-			{
+			if( m_pCvedMsgQ ) delete m_pCvedMsgQ;
+			m_pCvedMsgQ = new CCvedDistriMsgQ(m_pExternalCtrl);
+			std::string cvedErr;
+			initialized = m_pCvedMsgQ->Init( pHdrBlk->GetLriFile(), cvedErr )
+						&& m_pExternalCtrl->Initialize(static_cast<CHeaderDistriParseBlock&>(*pHdrBlk), m_pCvedMsgQ); //the configuration for localhost simulator will be identified
 #ifdef _DEBUG
+			if (!initialized)
+			{
 				CString strLog;
-				strLog.Format(_T("Cved::Init failed: %s"), cvedErr.c_str());
+				strLog.Format(_T("External Control Initialization failed:%s"), cvedErr);
 				_AtlModule.LogEventEx(3, strLog, EVENTLOG_ERROR_TYPE);
-#endif
-				hr = E_UNEXPECTED;
 			}
-			else
-			{
-				Initialized = m_pExternalCtrl->Initialize(static_cast<CHeaderDistriParseBlock&>(*pHdrBlk), static_cast<CVED::CCvedDistri*>(m_pCved)); //the configuration for localhost simulator will be identified
-#ifdef _DEBUG
-				if (!Initialized)
-				{
-					CString strLog;
-					strLog.Format(_T("External Control Initialization failed"));
-					_AtlModule.LogEventEx(3, strLog, EVENTLOG_ERROR_TYPE);
-				}
 #endif
-
-			}
 		}
 
-		if (!Initialized)
+		if (!initialized)
 		{
 			::ReleaseNetworkExternalObjectControl(m_pExternalCtrl);
 			m_pExternalCtrl = NULL;
@@ -125,12 +105,95 @@ STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 STDMETHODIMP CDistriObjsCtrl::UnInitialize(void)
 {
 	// TODO: Add your implementation code here
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	delete m_pCvedMsgQ;
+	m_pCvedMsgQ = NULL;
 	if (m_pExternalCtrl)
 		m_pExternalCtrl->UnInitialize();
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("%s->Initialize(%s)"), NULL == m_pExternalCtrl ? "NULL" : "Not NULL");
 	_AtlModule.LogEventEx(4, strLog);
+#endif
+	return S_OK;
+}
+
+
+STDMETHODIMP CDistriObjsCtrl::QFrontEvent(EVT* evt, VARIANT_BOOL* empty)
+{
+	// TODO: front event from cved message queue
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	if (!m_pCvedMsgQ->empty())
+	{
+		*empty = FALSE;
+		*evt = m_pCvedMsgQ->front();
+	}
+	else
+	{
+		*empty = TRUE;
+		*evt = evtUndefined;
+	}
+#ifdef _DEBUG
+	CString strLog;
+	const TCHAR* evtName[] = {"crtDyno", "delDyno", "evtUndefined"};
+	const TCHAR* boolName[] = {"false", "true"};
+	strLog.Format(_T("QFrontEvent(%s, %s)"), evtName[*evt], boolName[*empty]);
+	_AtlModule.LogEventEx(5, strLog);
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::QPopEvent(void)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	m_pCvedMsgQ->pop();
+#ifdef _DEBUG
+	_AtlModule.LogEventEx(6, _T("QPopEvent"));
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::GetcrtDynoTuple(LONG *id_local, BSTR *name, LONG *solId,
+							DOUBLE *xSize, DOUBLE *ySize, DOUBLE *zSize,
+							DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos,
+							DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan,
+							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	std::string strName;
+	m_pCvedMsgQ->crtDynoParams(id_local, strName, solId,
+							xSize, ySize, zSize,
+							xPos, yPos, zPos,
+							xTan, yTan, zTan,
+							xLat, yLat, zLat);
+	_bstr_t bName(strName.c_str());
+	*name = bName;
+#ifdef _DEBUG
+	CString strLog;
+
+	strLog.Format(_T("GetcrtDynoTuple(%d, %s, %d")
+									_T("\n\t%f, %f, %f")
+									_T("\n\t%f, %f, %f")
+									_T("\n\t%f, %f, %f")
+									_T("\n\t%f, %f, %f")
+									, *id_local, strName.c_str(), *solId
+									, *xSize, *ySize, *zSize
+									, *xPos, *yPos, *zPos
+									, *xTan, *yTan, *zTan
+									, *xLat, *yLat, *zLat);
+	_AtlModule.LogEventEx(7, strLog);
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::GetdelDynoTuple(LONG *id_local)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	m_pCvedMsgQ->delDynoParams(id_local);
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("GetdelDynoTuple(%d)"), *id_local);
+	_AtlModule.LogEventEx(8, strLog);
 #endif
 	return S_OK;
 }

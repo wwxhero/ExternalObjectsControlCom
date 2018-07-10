@@ -112,6 +112,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CvedDistriMsgQ.cpp" />
     <ClCompile Include="DistriObjsCtrl.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
@@ -136,6 +137,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CvedDistriMsgQ.h" />
     <ClInclude Include="DistriObjsCtrl.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="ExternalObjectsControlCom_i.h" />

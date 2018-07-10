@@ -34,6 +34,9 @@
     <ClCompile Include="DistriObjsCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CvedDistriMsgQ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -52,6 +55,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="DistriObjsCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CvedDistriMsgQ.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
