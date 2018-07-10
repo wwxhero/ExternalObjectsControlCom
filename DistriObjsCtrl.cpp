@@ -70,6 +70,9 @@ STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 			CHeaderParseBlock* pHdrBlk = new CHeaderDistriParseBlock( *pBlock );
 			if( m_pCvedMsgQ ) delete m_pCvedMsgQ;
 			m_pCvedMsgQ = new CCvedDistriMsgQ(m_pExternalCtrl);
+			double behavDeltaT  = (float) (1.0f / 30.0f);
+			int dynaMult     = 2;
+			m_pCvedMsgQ->Configure( CVED::CCved::eCV_SINGLE_USER, behavDeltaT, dynaMult );
 			std::string cvedErr;
 			initialized = m_pCvedMsgQ->Init( pHdrBlk->GetLriFile(), cvedErr )
 						&& m_pExternalCtrl->Initialize(static_cast<CHeaderDistriParseBlock&>(*pHdrBlk), m_pCvedMsgQ); //the configuration for localhost simulator will be identified
@@ -77,7 +80,7 @@ STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 			if (!initialized)
 			{
 				CString strLog;
-				strLog.Format(_T("External Control Initialization failed:%s"), cvedErr);
+				strLog.Format(_T("External Control Initialization failed:%s"), cvedErr.c_str());
 				_AtlModule.LogEventEx(3, strLog, EVENTLOG_ERROR_TYPE);
 			}
 #endif
@@ -96,7 +99,7 @@ STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 	CString strLog;
 	_com_error err(hr);
 	strLog.Format(_T("%s = Initialize(%s)"), err.ErrorMessage(), (LPCTSTR)pathScene);
-	_AtlModule.LogEventEx(3, strLog);
+	_AtlModule.LogEventEx(3, strLog, initialized ? EVENTLOG_INFORMATION_TYPE : EVENTLOG_ERROR_TYPE);
 #endif
 	return hr;
 }
@@ -104,15 +107,15 @@ STDMETHODIMP CDistriObjsCtrl::Initialize(BSTR a_pathScene)
 
 STDMETHODIMP CDistriObjsCtrl::UnInitialize(void)
 {
-	// TODO: Add your implementation code here
+	// TODO: unitialize external control
+	if (m_pExternalCtrl)
+		m_pExternalCtrl->UnInitialize();
 	ATLASSERT(NULL != m_pCvedMsgQ);
 	delete m_pCvedMsgQ;
 	m_pCvedMsgQ = NULL;
-	if (m_pExternalCtrl)
-		m_pExternalCtrl->UnInitialize();
 #ifdef _DEBUG
 	CString strLog;
-	strLog.Format(_T("%s->Initialize(%s)"), NULL == m_pExternalCtrl ? "NULL" : "Not NULL");
+	strLog.Format(_T("%s->UnInitialize()"), NULL == m_pExternalCtrl ? "NULL" : "Not NULL");
 	_AtlModule.LogEventEx(4, strLog);
 #endif
 	return S_OK;

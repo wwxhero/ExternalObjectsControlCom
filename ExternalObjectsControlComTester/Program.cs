@@ -9,6 +9,7 @@ namespace ExternalObjectsControlComTester
 {
     class Program
     {
+        static string s_sceneTest = "E:\\Distri_NadsMiniSim_2.2.1\\data\\distri_demo_fhwa_unitydev.scn";
         static void testCreateRelease()
         {
             try
@@ -29,8 +30,7 @@ namespace ExternalObjectsControlComTester
             {
                 IDistriObjsCtrl pCtrl = new DistriObjsCtrlClass();
                 pCtrl.CreateNetworkExternalObjectControl(1, 0);
-                string scenePath = "E:\\Distri_NadsMiniSim_2.2.1\\data\\distri_demo_fhwa.scn";
-                pCtrl.Initialize(scenePath);
+                pCtrl.Initialize(s_sceneTest);
                 pCtrl.UnInitialize();
                 pCtrl.ReleaseNetworkExternalObjectControl();
             }
@@ -46,11 +46,10 @@ namespace ExternalObjectsControlComTester
             {
                 IDistriObjsCtrl pCtrl = new DistriObjsCtrlClass();
                 pCtrl.CreateNetworkExternalObjectControl(1, 0);
-                string scenePath = "E:\\Distri_NadsMiniSim_2.2.1\\data\\distri_demo_fhwa.scn";
-                pCtrl.Initialize(scenePath);
+                pCtrl.Initialize(s_sceneTest);
 
                 bool recieving = true;
-                EVT evt = EVT.undefined;
+                EVT evt = EVT.evtUndefined;
                 string[] evtNames = { "create dynobj", "delete dynobj", "undefined" };
                 while (recieving)
                 {
@@ -69,9 +68,9 @@ namespace ExternalObjectsControlComTester
                                     string name;
                                     int solId;
                                     double xSize, ySize, zSize;
-                                    float xPos, yPos, zPos;
-                                    float xTan, yTan, zTan;
-                                    float xLat, yLat, zLat;
+                                    double xPos, yPos, zPos;
+                                    double xTan, yTan, zTan;
+                                    double xLat, yLat, zLat;
                                     pCtrl.GetcrtDynoTuple(out id, out name, out solId
                                             , out xSize, out ySize, out zSize
                                             , out xPos, out yPos, out zPos
@@ -83,7 +82,7 @@ namespace ExternalObjectsControlComTester
                                                                   \n\tpos:<{5},{6},{7}>
                                                                   \n\ttan:<{8},{9},{10}>
                                                                   \n\tlat:<{11},{12},{13}>"
-                                                                    , name, soldId
+                                                                    , name, solId
                                                                     , xSize, ySize, zSize
                                                                     , xPos, yPos, zPos
                                                                     , xTan, yTan, zTan
@@ -130,8 +129,8 @@ namespace ExternalObjectsControlComTester
         static void Main(string[] args)
         {
             testCreateRelease();
-            //testInitializeUnInitialize();
-            testInitializeUnInitialize2();
+            testInitializeUnInitialize();
+            //testInitializeUnInitialize2();
         }
     }
 }
