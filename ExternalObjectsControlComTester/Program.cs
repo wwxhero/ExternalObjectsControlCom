@@ -10,12 +10,15 @@ namespace ExternalObjectsControlComTester
     class Program
     {
         static string s_sceneTest = "E:\\Distri_NadsMiniSim_2.2.1\\data\\distri_demo_fhwa_unitydev.scn";
+        enum IMPLE { IGCOMM = 0, DISVRLINK};
+        enum TERMINAL {edo_controller = 0, ado_controller, ped_controller};
         static void testCreateRelease()
         {
+            Console.WriteLine("testCreateRelease...");
             try
             {
                 IDistriObjsCtrl pCtrl = new DistriObjsCtrlClass();
-                pCtrl.CreateNetworkExternalObjectControl(1, 0);
+                pCtrl.CreateNetworkExternalObjectControl((int)IMPLE.DISVRLINK, (int)TERMINAL.ped_controller);
                 pCtrl.ReleaseNetworkExternalObjectControl();
             }
             catch (Exception e)
@@ -26,10 +29,11 @@ namespace ExternalObjectsControlComTester
 
         static void testInitializeUnInitialize()
         {
+            Console.WriteLine("testInitializeUnInitialize...");
             try
             {
                 IDistriObjsCtrl pCtrl = new DistriObjsCtrlClass();
-                pCtrl.CreateNetworkExternalObjectControl(1, 0);
+                pCtrl.CreateNetworkExternalObjectControl((int)IMPLE.DISVRLINK, (int)TERMINAL.ped_controller);
                 pCtrl.Initialize(s_sceneTest);
                 pCtrl.UnInitialize();
                 pCtrl.ReleaseNetworkExternalObjectControl();
@@ -40,12 +44,13 @@ namespace ExternalObjectsControlComTester
             }
         }
 
-        static void testInitializeUnInitialize2()
+        static void testReceiving()
         {
+            Console.WriteLine("testReceiving...");
             try
             {
                 IDistriObjsCtrl pCtrl = new DistriObjsCtrlClass();
-                pCtrl.CreateNetworkExternalObjectControl(1, 0);
+                pCtrl.CreateNetworkExternalObjectControl((int)IMPLE.DISVRLINK, (int)TERMINAL.ped_controller);
                 pCtrl.Initialize(s_sceneTest);
 
                 bool recieving = true;
@@ -59,6 +64,7 @@ namespace ExternalObjectsControlComTester
                         pCtrl.QFrontEvent(out evt, out empty);
                         if (empty)
                             break;
+                        Console.WriteLine("\n");
                         Console.WriteLine(evtNames[(int)evt]);
                         switch (evt)
                         {
@@ -76,12 +82,7 @@ namespace ExternalObjectsControlComTester
                                             , out xPos, out yPos, out zPos
                                             , out xTan, out yTan, out zTan
                                             , out xLat, out yLat, out zLat);
-                                    string strTuple = string.Format(@"\n\tid:{14}
-                                                                  \n\tname:{0}\tsolId:{1}
-                                                                  \n\tsize:<{2},{3},{4}>
-                                                                  \n\tpos:<{5},{6},{7}>
-                                                                  \n\ttan:<{8},{9},{10}>
-                                                                  \n\tlat:<{11},{12},{13}>"
+                                    string strTuple = string.Format("\n\tid:{14}\n\tname:{0}\tsolId:{1}\n\tsize:<{2},{3},{4}>\n\tpos:<{5},{6},{7}>\n\ttan:<{8},{9},{10}>\n\tlat:<{11},{12},{13}>"
                                                                     , name, solId
                                                                     , xSize, ySize, zSize
                                                                     , xPos, yPos, zPos
@@ -104,6 +105,7 @@ namespace ExternalObjectsControlComTester
                         pCtrl.QPopEvent();
                     }
 
+                    //inject receiving code
 
                     ConsoleKeyInfo key = new ConsoleKeyInfo();
                     if (Console.KeyAvailable)
@@ -128,9 +130,9 @@ namespace ExternalObjectsControlComTester
 
         static void Main(string[] args)
         {
-            testCreateRelease();
-            testInitializeUnInitialize();
-            //testInitializeUnInitialize2();
+            //testCreateRelease();
+            //testInitializeUnInitialize();
+            testReceiving();
         }
     }
 }

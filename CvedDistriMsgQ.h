@@ -20,9 +20,9 @@ public:
 					, double *xLat, double *yLat, double *zLat);
 	void delDynoParams(long* id_local);
 protected:
-	virtual CVED::CDynObj* LocalCreatePeerDriver(CHeaderDistriParseBlock& blk)
+	virtual CVED::CDynObj* LocalCreateDynObj(CHeaderDistriParseBlock& blk)
 	{
-		return CCvedDistri::LocalCreatePeerDriver(blk, eCV_VEHICLE);
+		return CCvedDistri::LocalCreateDynObj(blk, eCV_VEHICLE);
 	}
 	virtual void LocalDeleteDynObj( CVED::CDynObj* );
 	virtual CVED::CDynObj* LocalCreateDynObj(
