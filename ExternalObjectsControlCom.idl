@@ -7,6 +7,7 @@
 import "oaidl.idl";
 import "ocidl.idl";
 
+
 enum EVT
 {
     crtDyno = 0
@@ -35,6 +36,12 @@ interface IDistriObjsCtrl : IDispatch{
 									, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
 									, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
 	[id(8)] HRESULT GetdelDynoTuple([out] LONG* id_local);
+	[id(9)] HRESULT PreUpdateDynamicModels(void);
+	[id(10)] HRESULT PostUpdateDynamicModels(void);
+	[id(11)] HRESULT OnGetUpdate([in] LONG id_local, [out] VARIANT_BOOL* received
+							, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
+							, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
+							, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
 };
 [
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),

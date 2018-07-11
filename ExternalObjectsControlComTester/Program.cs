@@ -56,6 +56,7 @@ namespace ExternalObjectsControlComTester
                 bool recieving = true;
                 EVT evt = EVT.evtUndefined;
                 string[] evtNames = { "create dynobj", "delete dynobj", "undefined" };
+                List<int> dynObjs = new List<int>();
                 while (recieving)
                 {
                     bool empty = true;
@@ -90,6 +91,7 @@ namespace ExternalObjectsControlComTester
                                                                     , xLat, yLat, zLat
                                                                     , id);
                                     Console.Write(strTuple);
+                                    dynObjs.Add(id);
                                     break;
                                 }
 
@@ -99,13 +101,32 @@ namespace ExternalObjectsControlComTester
                                     pCtrl.GetdelDynoTuple(out id);
                                     string strTuple = string.Format("\n\tid:{0}", id);
                                     Console.Write(strTuple);
+                                    dynObjs.Remove(id);
                                     break;
                                 }
                         }
                         pCtrl.QPopEvent();
                     }
 
+                    pCtrl.PreUpdateDynamicModels();
                     //inject receiving code
+                    foreach (int id_local in dynObjs)
+                    {
+                        bool received = true;
+                        double xPos, yPos, zPos;
+                        double xTan, yTan, zTan;
+                        double xLat, yLat, zLat;
+                        pCtrl.OnGetUpdate(id_local, out received
+                                    , out xPos, out yPos, out zPos
+                                    , out xTan, out yTan, out zTan
+                                    , out xLat, out yLat, out zLat);
+                        string strTuple = string.Format("\nreceived = {0}:\n\tpos=[{1},{2},{3}]\n\ttan=[{4},{5},{6}]\n\tlat=[{7},{8},{9}]"
+                                                        , received, xPos, yPos, zPos, xTan, yTan, zTan, xLat, yLat, zLat);
+                        Console.Write(strTuple);
+                    }
+                    //inject sending state code
+                    pCtrl.PostUpdateDynamicModels();
+
 
                     ConsoleKeyInfo key = new ConsoleKeyInfo();
                     if (Console.KeyAvailable)

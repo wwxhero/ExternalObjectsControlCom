@@ -200,3 +200,57 @@ STDMETHODIMP CDistriObjsCtrl::GetdelDynoTuple(LONG *id_local)
 #endif
 	return S_OK;
 }
+
+STDMETHODIMP CDistriObjsCtrl::PreUpdateDynamicModels(void)
+{
+	ATLASSERT(NULL != m_pExternalCtrl);
+	m_pExternalCtrl->PreUpdateDynamicModels();
+#ifdef _DEBUG
+	_AtlModule.LogEventEx(9, _T("PreUpdateDynamicModels"));
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::PostUpdateDynamicModels(void)
+{
+	ATLASSERT(NULL != m_pExternalCtrl);
+	m_pExternalCtrl->PostUpdateDynamicModels();
+#ifdef _DEBUG
+	_AtlModule.LogEventEx(10, _T("PostUpdateDynamicModels"));
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::OnGetUpdate(LONG id_local, VARIANT_BOOL *received
+						, DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos
+						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
+						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
+{
+	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
+	cvTObjState outp;
+	ATLASSERT(NULL != m_pExternalCtrl);
+	if (*received = m_pExternalCtrl->OnGetUpdate(id_local, &inp, &outp))
+	{
+		*xPos = outp.vehicleState.vehState.position.x;
+		*yPos = outp.vehicleState.vehState.position.y;
+		*zPos = outp.vehicleState.vehState.position.z;
+
+		*xTan = outp.vehicleState.vehState.tangent.i;
+		*yTan = outp.vehicleState.vehState.tangent.j;
+		*zTan = outp.vehicleState.vehState.tangent.k;
+
+		*xLat = outp.vehicleState.vehState.lateral.i;
+		*yLat = outp.vehicleState.vehState.lateral.j;
+		*zLat = outp.vehicleState.vehState.lateral.k;
+	}
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("%s = OnGetUpdate(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
+				, *received?_T("true"):_T("false"), id_local
+				, *xPos, *yPos, *zPos
+				, *xTan, *yTan, *zTan
+				, *xLat, *yLat, *zLat);
+	_AtlModule.LogEventEx(11, strLog);
+#endif
+	return S_OK;
+}

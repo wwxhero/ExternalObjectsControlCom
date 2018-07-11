@@ -69,6 +69,12 @@ public:
 							DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan,
 							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
 	STDMETHOD(GetdelDynoTuple)(LONG *id_local);
+	STDMETHOD(PreUpdateDynamicModels)(void);
+	STDMETHOD(PostUpdateDynamicModels)(void);
+	STDMETHOD(OnGetUpdate)(LONG id_local, VARIANT_BOOL *received
+						, DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos
+						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
+						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
 private:
 	CCvedDistriMsgQ* m_pCvedMsgQ;
 	CVED::IExternalObjectControl* m_pExternalCtrl;
