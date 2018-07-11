@@ -1,6 +1,9 @@
 #pragma once
+#include <boost/circular_buffer.hpp>
+
 #include "ExternalObjectsControlCom_i.h"
 #include "cveddistri.h"
+#define MAX_NAME_LEN 64
 class CCvedDistriMsgQ :
 	public CVED::CCvedDistri
 {
@@ -34,14 +37,34 @@ protected:
 								const cvTObjAttr&	cAttr,
 								const CPoint3D*		cpInitPos=0,
 								const CVector3D*	cpInitTan=0,
-								const CVector3D*	cpInitLat=0)
+								const CVector3D*	cpInitLat=0);
+
+	virtual void		DistriDeleteDynObj( CVED::CDynObj* );
+private:
+	union Param
 	{
-		ATLASSERT(0); //it doesn't accept Distrixxxx calls
-		return NULL;
-	}
-	virtual void		DistriDeleteDynObj( CVED::CDynObj* )
-	{
-		ATLASSERT(0);
-	}
+		struct evtDef
+		{
+			EVT evt;
+		} ParamDef;
+		struct crtDyno
+		{
+			EVT evt;
+			long id_local;
+			char name[MAX_NAME_LEN];
+			long solId;
+			double xSize, ySize, zSize;
+			double xPos, yPos, zPos;
+			double xTan, yTan, zTan;
+			double xLat, yLat, zLat;
+		} ParamCrtDyno;
+		struct delDyno
+		{
+			EVT evt;
+			long id_local;
+		} ParamDelDyno;
+	};
+
+	boost::circular_buffer<Param> m_msgQ;
 };
 
