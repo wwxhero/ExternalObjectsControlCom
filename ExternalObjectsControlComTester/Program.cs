@@ -59,17 +59,19 @@ namespace ExternalObjectsControlComTester
                 List<int> dynObjs = new List<int>();
                 while (recieving)
                 {
-                    bool empty = true;
-                    while (true)
+                    pCtrl.PreUpdateDynamicModels();
+
+                    bool empty = false;
+                    do
                     {
                         pCtrl.QFrontEvent(out evt, out empty);
-                        if (empty)
-                            break;
-                        Console.WriteLine("\n");
-                        Console.WriteLine(evtNames[(int)evt]);
-                        switch (evt)
+                        if (!empty)
                         {
-                            case EVT.crtDyno:
+                            Console.WriteLine("\n");
+                            Console.WriteLine(evtNames[(int)evt]);
+                            switch (evt)
+                            {
+                                case EVT.crtDyno:
                                 {
                                     int id;
                                     string name;
@@ -95,7 +97,7 @@ namespace ExternalObjectsControlComTester
                                     break;
                                 }
 
-                            case EVT.delDyno:
+                                case EVT.delDyno:
                                 {
                                     int id;
                                     pCtrl.GetdelDynoTuple(out id);
@@ -104,11 +106,11 @@ namespace ExternalObjectsControlComTester
                                     dynObjs.Remove(id);
                                     break;
                                 }
+                            }
+                            pCtrl.QPopEvent();
                         }
-                        pCtrl.QPopEvent();
-                    }
+                    } while (!empty);
 
-                    pCtrl.PreUpdateDynamicModels();
                     //inject receiving code
                     foreach (int id_local in dynObjs)
                     {
@@ -125,8 +127,9 @@ namespace ExternalObjectsControlComTester
                         Console.Write(strTuple);
                     }
                     //inject sending state code
-                    pCtrl.PostUpdateDynamicModels();
 
+
+                    pCtrl.PostUpdateDynamicModels();
 
                     ConsoleKeyInfo key = new ConsoleKeyInfo();
                     if (Console.KeyAvailable)
