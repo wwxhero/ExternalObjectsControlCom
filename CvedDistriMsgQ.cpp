@@ -114,6 +114,91 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreateDynObj(const string&		cName,
 	return obj;
 }
 
+CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePedObj(const string&		cName,
+												const cvTObjAttr&	cAttr,
+												const CPoint3D*		cpInitPos,
+												const CVector3D*	cpInitTan,
+												const CVector3D*	cpInitLat)
+{
+	//todo: record a message for creating dyn obj
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_DRIVER, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	if (NULL != obj)
+	{
+		Param param;
+		param.ParamCrtPed.evt = crtPed;
+		ATLASSERT(cName.length() <= MAX_NAME_LEN); //doesn't support long name
+		strcpy(param.ParamCrtPed.name, cName.c_str());
+		param.ParamCrtPed.id_local = obj->GetId();
+		param.ParamCrtPed.solId = cAttr.solId;
+		param.ParamCrtPed.xSize = cAttr.xSize;
+		param.ParamCrtPed.ySize = cAttr.ySize;
+		param.ParamCrtPed.zSize = cAttr.zSize;
+		param.ParamCrtPed.xPos = cpInitPos->m_x;
+		param.ParamCrtPed.yPos = cpInitPos->m_y;
+		param.ParamCrtPed.zPos = cpInitPos->m_z;
+		param.ParamCrtPed.xTan = cpInitTan->m_i;
+		param.ParamCrtPed.yTan = cpInitTan->m_j;
+		param.ParamCrtPed.zTan = cpInitTan->m_k;
+		param.ParamCrtPed.xLat = cpInitLat->m_i;
+		param.ParamCrtPed.yLat = cpInitLat->m_j;
+		param.ParamCrtPed.zLat = cpInitLat->m_k;
+		if (m_msgQ.full())
+		{
+			m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);
+		}
+		m_msgQ.push_back(param);
+	}
+	return obj;
+}
+
+
+void CCvedDistriMsgQ::LocalDeletePedObj(CVED::CDynObj* pObj)
+{
+	//todo: record a message for deleting dyn obj
+	Param param;
+	param.ParamDelPed.evt = delPed;
+	param.ParamDelPed.id_local = pObj->GetId();
+	if (m_msgQ.full())
+	{
+		m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);
+	}
+	m_msgQ.push_back(param);
+	CCvedDistri::LocalDeleteDynObj(pObj);
+}
+
+void CCvedDistriMsgQ::crtPedParams(long* id_local, std::string& name, long* solId
+							, double *xSize, double *ySize, double *zSize
+							, double *xPos, double *yPos, double *zPos
+							, double *xTan, double *yTan, double *zTan
+							, double *xLat, double *yLat, double *zLat)
+{
+	//todo: returns the crtDyno parameters
+	Param param = m_msgQ.front();
+	ATLASSERT(param.ParamDef.evt == crtPed);
+	*id_local = param.ParamCrtPed.id_local;
+	name = param.ParamCrtPed.name;
+	*solId = param.ParamCrtPed.solId;
+	*xSize = param.ParamCrtPed.xSize;
+	*ySize = param.ParamCrtPed.ySize;
+	*zSize = param.ParamCrtPed.zSize;
+	*xPos = param.ParamCrtPed.xPos;
+	*yPos = param.ParamCrtPed.yPos;
+	*zPos = param.ParamCrtPed.zPos;
+	*xTan = param.ParamCrtPed.xTan;
+	*yTan = param.ParamCrtPed.yTan;
+	*zTan = param.ParamCrtPed.zTan;
+	*xLat = param.ParamCrtPed.xLat;
+	*yLat = param.ParamCrtPed.yLat;
+	*zLat = param.ParamCrtPed.zLat;
+}
+void CCvedDistriMsgQ::delPedParams(long* id_local)
+{
+	//todo: returns the delDyno parameters
+	Param param = m_msgQ.front();
+	ATLASSERT(param.ParamDef.evt == delPed);
+	*id_local = param.ParamDelPed.id_local;
+}
+
 CVED::CDynObj*	CCvedDistriMsgQ::DistriCreateDynObj(const string&		cName,
 								const cvTObjAttr&	cAttr,
 								const CPoint3D*		cpInitPos,

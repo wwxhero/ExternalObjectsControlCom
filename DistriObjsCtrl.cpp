@@ -138,7 +138,7 @@ STDMETHODIMP CDistriObjsCtrl::QFrontEvent(EVT* evt, VARIANT_BOOL* empty)
 	}
 #ifdef _DEBUG
 	CString strLog;
-	const TCHAR* evtName[] = {"crtDyno", "delDyno", "evtUndefined"};
+	const TCHAR* evtName[] = {"crtDyno", "delDyno", "crtPed", "delPed", "evtUndefined"};
 	const TCHAR* boolName[] = {"false", "true"};
 	strLog.Format(_T("QFrontEvent(%s, %s)"), evtName[*evt], boolName[*empty]);
 	_AtlModule.LogEventEx(5, strLog);
@@ -201,12 +201,57 @@ STDMETHODIMP CDistriObjsCtrl::GetdelDynoTuple(LONG *id_local)
 	return S_OK;
 }
 
+STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *solId,
+							DOUBLE *xSize, DOUBLE *ySize, DOUBLE *zSize,
+							DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos,
+							DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan,
+							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	std::string strName;
+	m_pCvedMsgQ->crtPedParams(id_local, strName, solId,
+							xSize, ySize, zSize,
+							xPos, yPos, zPos,
+							xTan, yTan, zTan,
+							xLat, yLat, zLat);
+	_bstr_t bName(strName.c_str());
+	*name = bName;
+#ifdef _DEBUG
+	CString strLog;
+
+	strLog.Format(_T("GetcrtPedTuple(%d, %s, %d")
+									_T("\n\t%f, %f, %f")
+									_T("\n\t%f, %f, %f")
+									_T("\n\t%f, %f, %f")
+									_T("\n\t%f, %f, %f")
+									, *id_local, strName.c_str(), *solId
+									, *xSize, *ySize, *zSize
+									, *xPos, *yPos, *zPos
+									, *xTan, *yTan, *zTan
+									, *xLat, *yLat, *zLat);
+	_AtlModule.LogEventEx(9, strLog);
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	m_pCvedMsgQ->delPedParams(id_local);
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("GetdelPedTuple(%d)"), *id_local);
+	_AtlModule.LogEventEx(10, strLog);
+#endif
+	return S_OK;
+}
+
 STDMETHODIMP CDistriObjsCtrl::PreUpdateDynamicModels(void)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
 	m_pExternalCtrl->PreUpdateDynamicModels();
 #ifdef _DEBUG
-	_AtlModule.LogEventEx(9, _T("PreUpdateDynamicModels"));
+	_AtlModule.LogEventEx(11, _T("PreUpdateDynamicModels"));
 #endif
 	return S_OK;
 }
@@ -216,7 +261,7 @@ STDMETHODIMP CDistriObjsCtrl::PostUpdateDynamicModels(void)
 	ATLASSERT(NULL != m_pExternalCtrl);
 	m_pExternalCtrl->PostUpdateDynamicModels();
 #ifdef _DEBUG
-	_AtlModule.LogEventEx(10, _T("PostUpdateDynamicModels"));
+	_AtlModule.LogEventEx(12, _T("PostUpdateDynamicModels"));
 #endif
 	return S_OK;
 }
@@ -250,7 +295,9 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdate(LONG id_local, VARIANT_BOOL *received
 				, *xPos, *yPos, *zPos
 				, *xTan, *yTan, *zTan
 				, *xLat, *yLat, *zLat);
-	_AtlModule.LogEventEx(11, strLog);
+	_AtlModule.LogEventEx(13, strLog);
 #endif
 	return S_OK;
 }
+
+

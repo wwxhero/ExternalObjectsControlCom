@@ -12,6 +12,8 @@ enum EVT
 {
     crtDyno = 0
 	, delDyno
+	, crtPed
+	, delPed
 	, evtUndefined
 };
 
@@ -36,9 +38,15 @@ interface IDistriObjsCtrl : IDispatch{
 									, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
 									, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
 	[id(8)] HRESULT GetdelDynoTuple([out] LONG* id_local);
-	[id(9)] HRESULT PreUpdateDynamicModels(void);
-	[id(10)] HRESULT PostUpdateDynamicModels(void);
-	[id(11)] HRESULT OnGetUpdate([in] LONG id_local, [out] VARIANT_BOOL* received
+	[id(9)] HRESULT GetcrtPedTuple([out] LONG* id_local, [out] BSTR* name, [out] LONG* solId
+									, [out] DOUBLE* xSize, [out] DOUBLE* ySize, [out] DOUBLE* zSize
+									, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
+									, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
+									, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
+	[id(10)] HRESULT GetdelPedTuple([out] LONG* id_local);
+	[id(11)] HRESULT PreUpdateDynamicModels(void);
+	[id(12)] HRESULT PostUpdateDynamicModels(void);
+	[id(13)] HRESULT OnGetUpdate([in] LONG id_local, [out] VARIANT_BOOL* received
 							, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
 							, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
 							, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);

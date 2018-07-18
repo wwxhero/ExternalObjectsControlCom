@@ -19,11 +19,13 @@ public:
 					, double *xTan, double *yTan, double *zTan
 					, double *xLat, double *yLat, double *zLat);
 	void delDynoParams(long* id_local);
+	void crtPedParams(long* id_local, std::string& name, long* soldId
+					, double *xSize, double *ySize, double *zSize
+					, double *xPos, double *yPos, double *zPos
+					, double *xTan, double *yTan, double *zTan
+					, double *xLat, double *yLat, double *zLat);
+	void delPedParams(long* id_local);
 protected:
-	virtual CVED::CDynObj* LocalCreateDynObj(CHeaderDistriParseBlock& blk)
-	{
-		return CCvedDistri::LocalCreateDynObj(blk, eCV_VEHICLE);
-	}
 	virtual void LocalDeleteDynObj( CVED::CDynObj* );
 	virtual CVED::CDynObj* LocalCreateDynObj(
 					const string&		cName,
@@ -40,6 +42,15 @@ protected:
 								const CVector3D*	cpInitLat=0);
 
 	virtual void		DistriDeleteDynObj( CVED::CDynObj* );
+
+	virtual CVED::CDynObj* LocalCreatePedObj(
+					const string&		cName,
+					const cvTObjAttr&	cAttr,
+					const CPoint3D*		cpInitPos=0,
+					const CVector3D*	cpInitTan=0,
+					const CVector3D*	cpInitLat=0);
+
+	virtual void LocalDeletePedObj(CVED::CDynObj* );
 private:
 	union Param
 	{
@@ -63,6 +74,22 @@ private:
 			EVT evt;
 			long id_local;
 		} ParamDelDyno;
+		struct crtPed
+		{
+			EVT evt;
+			long id_local;
+			char name[MAX_NAME_LEN];
+			long solId;
+			double xSize, ySize, zSize;
+			double xPos, yPos, zPos;
+			double xTan, yTan, zTan;
+			double xLat, yLat, zLat;
+		} ParamCrtPed;
+		struct delPed
+		{
+			EVT evt;
+			long id_local;
+		} ParamDelPed;
 	};
 
 	boost::circular_buffer<Param> m_msgQ;
