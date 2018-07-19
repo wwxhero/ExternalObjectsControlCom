@@ -76,15 +76,14 @@ void CCvedDistriMsgQ::LocalDeleteDynObj( CVED::CDynObj* pObj)
 	CCvedDistri::LocalDeleteDynObj(pObj);
 }
 
-CVED::CDynObj* CCvedDistriMsgQ::LocalCreateDynObj(const string&		cName,
-												cvEObjType			type,
-												const cvTObjAttr&	cAttr,
-												const CPoint3D*		cpInitPos,
-												const CVector3D*	cpInitTan,
-												const CVector3D*	cpInitLat)
+CVED::CDynObj* CCvedDistriMsgQ::LocalCreateEDO(
+										const string&		cName,
+										const cvTObjAttr&	cAttr,
+										const CPoint3D*		cpInitPos,
+										const CVector3D*	cpInitTan,
+										const CVector3D*	cpInitLat)
 {
-	//todo: record a message for creating dyn obj
-	CVED::CDynObj* obj = CCvedDistri::LocalCreateDynObj(cName, type, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
@@ -114,7 +113,45 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreateDynObj(const string&		cName,
 	return obj;
 }
 
-CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePedObj(const string&		cName,
+CVED::CDynObj* CCvedDistriMsgQ::LocalCreateADO(
+										const string&		cName,
+										const cvTObjAttr&	cAttr,
+										const CPoint3D*		cpInitPos,
+										const CVector3D*	cpInitTan,
+										const CVector3D*	cpInitLat)
+{
+	//todo: record a message for creating dyn obj
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	if (NULL != obj)
+	{
+		Param param;
+		param.ParamCrtDyno.evt = crtDyno;
+		ATLASSERT(cName.length() <= MAX_NAME_LEN); //doesn't support long name
+		strcpy(param.ParamCrtDyno.name, cName.c_str());
+		param.ParamCrtDyno.id_local = obj->GetId();
+		param.ParamCrtDyno.solId = cAttr.solId;
+		param.ParamCrtDyno.xSize = cAttr.xSize;
+		param.ParamCrtDyno.ySize = cAttr.ySize;
+		param.ParamCrtDyno.zSize = cAttr.zSize;
+		param.ParamCrtDyno.xPos = cpInitPos->m_x;
+		param.ParamCrtDyno.yPos = cpInitPos->m_y;
+		param.ParamCrtDyno.zPos = cpInitPos->m_z;
+		param.ParamCrtDyno.xTan = cpInitTan->m_i;
+		param.ParamCrtDyno.yTan = cpInitTan->m_j;
+		param.ParamCrtDyno.zTan = cpInitTan->m_k;
+		param.ParamCrtDyno.xLat = cpInitLat->m_i;
+		param.ParamCrtDyno.yLat = cpInitLat->m_j;
+		param.ParamCrtDyno.zLat = cpInitLat->m_k;
+		if (m_msgQ.full())
+		{
+			m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);
+		}
+		m_msgQ.push_back(param);
+	}
+	return obj;
+}
+
+CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO(const string&		cName,
 												const cvTObjAttr&	cAttr,
 												const CPoint3D*		cpInitPos,
 												const CVector3D*	cpInitTan,
@@ -152,7 +189,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePedObj(const string&		cName,
 }
 
 
-void CCvedDistriMsgQ::LocalDeletePedObj(CVED::CDynObj* pObj)
+void CCvedDistriMsgQ::LocalDeletePDO(CVED::CDynObj* pObj)
 {
 	//todo: record a message for deleting dyn obj
 	Param param;
@@ -199,7 +236,7 @@ void CCvedDistriMsgQ::delPedParams(long* id_local)
 	*id_local = param.ParamDelPed.id_local;
 }
 
-CVED::CDynObj*	CCvedDistriMsgQ::DistriCreateDynObj(const string&		cName,
+CVED::CDynObj*	CCvedDistriMsgQ::DistriCreateADO(const string&		cName,
 								const cvTObjAttr&	cAttr,
 								const CPoint3D*		cpInitPos,
 								const CVector3D*	cpInitTan,
@@ -209,7 +246,7 @@ CVED::CDynObj*	CCvedDistriMsgQ::DistriCreateDynObj(const string&		cName,
 	return NULL;
 }
 
-void		CCvedDistriMsgQ::DistriDeleteDynObj(CVED::CDynObj*)
+void		CCvedDistriMsgQ::DistriDeleteADO(CVED::CDynObj*)
 {
 	ATLASSERT(0);
 }

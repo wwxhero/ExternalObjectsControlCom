@@ -26,31 +26,36 @@ public:
 					, double *xLat, double *yLat, double *zLat);
 	void delPedParams(long* id_local);
 protected:
-	virtual void LocalDeleteDynObj( CVED::CDynObj* );
-	virtual CVED::CDynObj* LocalCreateDynObj(
+	virtual CVED::CDynObj* LocalCreateEDO(
 					const string&		cName,
-					cvEObjType			type,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
+	virtual CVED::CDynObj* LocalCreateADO(
+					const string&		cName,
+					const cvTObjAttr&	cAttr,
+					const CPoint3D*		cpInitPos=0,
+					const CVector3D*	cpInitTan=0,
+					const CVector3D*	cpInitLat=0);
+	virtual void LocalDeleteDynObj( CVED::CDynObj* );
 
-	virtual CVED::CDynObj*	DistriCreateDynObj(const string&		cName,
+	virtual CVED::CDynObj*	DistriCreateADO(const string&		cName,
 								const cvTObjAttr&	cAttr,
 								const CPoint3D*		cpInitPos=0,
 								const CVector3D*	cpInitTan=0,
 								const CVector3D*	cpInitLat=0);
 
-	virtual void		DistriDeleteDynObj( CVED::CDynObj* );
+	virtual void		DistriDeleteADO( CVED::CDynObj* );
 
-	virtual CVED::CDynObj* LocalCreatePedObj(
+	virtual CVED::CDynObj* LocalCreatePDO(
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
 
-	virtual void LocalDeletePedObj(CVED::CDynObj* );
+	virtual void LocalDeletePDO(CVED::CDynObj* );
 private:
 	union Param
 	{
