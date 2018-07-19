@@ -300,4 +300,39 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdate(LONG id_local, VARIANT_BOOL *received
 	return S_OK;
 }
 
+STDMETHODIMP CDistriObjsCtrl::OnPushUpdate(LONG id_local
+						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
+						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
+						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat)
+{
+	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
+	cvTObjState s;
+
+	s.vehicleState.vehState.position.x = xPos;
+	s.vehicleState.vehState.position.y = yPos;
+	s.vehicleState.vehState.position.z = zPos;
+
+	s.vehicleState.vehState.tangent.i = xTan;
+	s.vehicleState.vehState.tangent.j = yTan;
+	s.vehicleState.vehState.tangent.k = zTan;
+
+	s.vehicleState.vehState.lateral.i = xLat;
+	s.vehicleState.vehState.lateral.j = yLat;
+	s.vehicleState.vehState.lateral.k = zLat;
+
+	ATLASSERT(NULL != m_pExternalCtrl);
+	m_pExternalCtrl->OnPushUpdate(id_local, &inp, &s);
+
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("OnPushUpdate(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
+				, id_local
+				, xPos, yPos, zPos
+				, xTan, yTan, zTan
+				, xLat, yLat, zLat);
+	_AtlModule.LogEventEx(14, strLog);
+#endif
+	return S_OK;
+}
+
 

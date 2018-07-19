@@ -50,6 +50,10 @@ interface IDistriObjsCtrl : IDispatch{
 							, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
 							, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
 							, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
+	[id(14)] HRESULT OnPushUpdate([in] LONG id_local
+							, [in] DOUBLE xPos, [in] DOUBLE yPos, [in] DOUBLE zPos
+							, [in] DOUBLE xTan, [in] DOUBLE yTan, [in] DOUBLE zTan
+							, [in] DOUBLE xLat, [in] DOUBLE yLat, [in] DOUBLE zLat);
 };
 [
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),

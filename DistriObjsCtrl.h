@@ -81,6 +81,10 @@ public:
 						, DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos
 						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
+	STDMETHOD(OnPushUpdate)(LONG id_local
+						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
+						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
+						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat);
 private:
 	CCvedDistriMsgQ* m_pCvedMsgQ;
 	CVED::IExternalObjectControl* m_pExternalCtrl;
