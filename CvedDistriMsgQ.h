@@ -49,6 +49,7 @@ protected:
 	virtual void		DistriDeleteADO( CVED::CDynObj* );
 
 	virtual CVED::CDynObj* LocalCreatePDO(
+					bool				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,

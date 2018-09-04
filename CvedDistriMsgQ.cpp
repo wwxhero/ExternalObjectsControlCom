@@ -151,14 +151,16 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreateADO(
 	return obj;
 }
 
-CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO(const string&		cName,
+CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
+												const string&		cName,
 												const cvTObjAttr&	cAttr,
 												const CPoint3D*		cpInitPos,
 												const CVector3D*	cpInitTan,
 												const CVector3D*	cpInitLat)
 {
 	//todo: record a message for creating dyn obj
-	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_DRIVER, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	cvEObjType type = (own ? eCV_EXTERNAL_DRIVER : eCV_VEHICLE);
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, type, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
