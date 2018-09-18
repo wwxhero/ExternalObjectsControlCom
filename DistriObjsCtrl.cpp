@@ -205,7 +205,8 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 							DOUBLE *xSize, DOUBLE *ySize, DOUBLE *zSize,
 							DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos,
 							DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan,
-							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
+							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat,
+							LONG *nParts)
 {
 	ATLASSERT(NULL != m_pCvedMsgQ);
 	std::string strName;
@@ -213,7 +214,8 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 							xSize, ySize, zSize,
 							xPos, yPos, zPos,
 							xTan, yTan, zTan,
-							xLat, yLat, zLat);
+							xLat, yLat, zLat,
+							nParts);
 	_bstr_t bName(strName.c_str());
 	*name = bName;
 #ifdef _DEBUG
@@ -306,7 +308,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPushUpdate(LONG id_local
 						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat)
 {
 	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
-	cvTObjState s;
+	cvTObjState s = {0};
 
 	s.vehicleState.vehState.position.x = xPos;
 	s.vehicleState.vehState.position.y = yPos;
@@ -335,4 +337,50 @@ STDMETHODIMP CDistriObjsCtrl::OnPushUpdate(LONG id_local
 	return S_OK;
 }
 
+STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_part, BSTR *name_part)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	std::string partName;
+	m_pCvedMsgQ->crtPedPartName(id_part, partName);
+	_bstr_t bName(partName.c_str());
+	*name_part = bName;
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("GetcrtPedPartName(%d, %s)")
+				, id_part
+				, partName.c_str());
+	_AtlModule.LogEventEx(15, strLog);
+#endif
+	return S_OK;
+}
 
+STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
+							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z)
+{
+	ATLASSERT(NULL != m_pExternalCtrl);
+	m_pExternalCtrl->OnGetUpdateArt(id_local, id_part
+						, w, x, y, z);
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("OnGetUpdateArt(%d, %d, %f, %f, %f, %f))
+				, id_local, id_part, *w, *x, *y, *z));
+	_AtlModule.LogEventEx(16, strLog);
+#endif
+	return S_OK;
+}
+STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
+							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z)
+{
+	ATLASSERT(NULL != m_pExternalCtrl);
+	m_pExternalCtrl->OnPushUpdateArt(id_local, id_part
+							, w, x, y, z);
+#ifdef _DEBUG
+	#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("OnPushUpdateArt(%d, %d, %f, %f, %f, %f))
+				, id_local, id_part, *w, *x, *y, *z));
+	_AtlModule.LogEventEx(16, strLog);
+#endif
+#endif
+	return S_OK;
+}

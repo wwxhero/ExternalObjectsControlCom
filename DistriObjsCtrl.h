@@ -73,7 +73,8 @@ public:
 							DOUBLE *xSize, DOUBLE *ySize, DOUBLE *zSize,
 							DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos,
 							DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan,
-							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
+							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat,
+							LONG *nParts);
 	STDMETHOD(GetdelPedTuple)(LONG *id_local);
 	STDMETHOD(PreUpdateDynamicModels)(void);
 	STDMETHOD(PostUpdateDynamicModels)(void);
@@ -85,6 +86,12 @@ public:
 						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
 						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
 						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat);
+	STDMETHOD(GetcrtPedPartName)(LONG id_part
+							, BSTR* name_part);
+	STDMETHOD(OnGetUpdateArt)(LONG id_local, LONG id_part
+							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z);
+	STDMETHOD(OnPushUpdateArt)(LONG id_local, LONG id_part
+							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z);
 private:
 	CCvedDistriMsgQ* m_pCvedMsgQ;
 	CVED::IExternalObjectControl* m_pExternalCtrl;

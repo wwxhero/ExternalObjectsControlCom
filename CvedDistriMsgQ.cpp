@@ -209,7 +209,8 @@ void CCvedDistriMsgQ::crtPedParams(long* id_local, std::string& name, long* solI
 							, double *xSize, double *ySize, double *zSize
 							, double *xPos, double *yPos, double *zPos
 							, double *xTan, double *yTan, double *zTan
-							, double *xLat, double *yLat, double *zLat)
+							, double *xLat, double *yLat, double *zLat
+							, long* nPart)
 {
 	//todo: returns the crtDyno parameters
 	Param param = m_msgQ.front();
@@ -229,7 +230,16 @@ void CCvedDistriMsgQ::crtPedParams(long* id_local, std::string& name, long* solI
 	*xLat = param.ParamCrtPed.xLat;
 	*yLat = param.ParamCrtPed.yLat;
 	*zLat = param.ParamCrtPed.zLat;
+	*nPart = param.ParamCrtPed.nPart;
 }
+
+void CCvedDistriMsgQ::crtPedPartName(long id_part, std::string& name)
+{
+	Param param = m_msgQ.front();
+	ATLASSERT(param.ParamDef.evt == crtPed);
+	name = param.ParamCrtPed.partNames[id_part];
+}
+
 void CCvedDistriMsgQ::delPedParams(long* id_local)
 {
 	//todo: returns the delDyno parameters
@@ -252,3 +262,4 @@ void		CCvedDistriMsgQ::DistriDeleteADO(CVED::CDynObj*)
 {
 	ATLASSERT(0);
 }
+

@@ -23,7 +23,9 @@ public:
 					, double *xSize, double *ySize, double *zSize
 					, double *xPos, double *yPos, double *zPos
 					, double *xTan, double *yTan, double *zTan
-					, double *xLat, double *yLat, double *zLat);
+					, double *xLat, double *yLat, double *zLat
+					, long *nPart);
+	void crtPedPartName(long id_part, std::string& name);
 	void delPedParams(long* id_local);
 protected:
 	virtual CVED::CDynObj* LocalCreateEDO(
@@ -90,6 +92,8 @@ private:
 			double xPos, yPos, zPos;
 			double xTan, yTan, zTan;
 			double xLat, yLat, zLat;
+			long nPart;
+			std::string* partNames;
 		} ParamCrtPed;
 		struct delPed
 		{
