@@ -55,7 +55,8 @@ interface IDistriObjsCtrl : IDispatch{
 							, [in] DOUBLE xPos, [in] DOUBLE yPos, [in] DOUBLE zPos
 							, [in] DOUBLE xTan, [in] DOUBLE yTan, [in] DOUBLE zTan
 							, [in] DOUBLE xLat, [in] DOUBLE yLat, [in] DOUBLE zLat);
-	[id(15)] HRESULT GetcrtPedPartName([in] LONG id_part
+	[id(15)] HRESULT GetcrtPedPartName([in] LONG id_local
+							, [in] LONG id_part
 							, [out] BSTR* name_part);
 	[id(16)] HRESULT OnGetUpdateArt([in] LONG id_local, [in] LONG id_part
 							, [out] DOUBLE* w, [out] DOUBLE* x, [out] DOUBLE* y, [out] DOUBLE* z);

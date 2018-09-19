@@ -337,11 +337,11 @@ STDMETHODIMP CDistriObjsCtrl::OnPushUpdate(LONG id_local
 	return S_OK;
 }
 
-STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_part, BSTR *name_part)
+STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_local, LONG id_part, BSTR *name_part)
 {
 	ATLASSERT(NULL != m_pCvedMsgQ);
 	std::string partName;
-	m_pCvedMsgQ->crtPedPartName(id_part, partName);
+	m_pCvedMsgQ->crtPedPartName(id_local, id_part, partName);
 	_bstr_t bName(partName.c_str());
 	*name_part = bName;
 #ifdef _DEBUG
