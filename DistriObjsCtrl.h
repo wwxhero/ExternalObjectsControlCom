@@ -82,17 +82,21 @@ public:
 						, DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos
 						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
-	STDMETHOD(OnPushUpdate)(LONG id_local
-						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
-						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
-						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat);
 	STDMETHOD(GetcrtPedPartName)(LONG id_local
 							, LONG id_part
 							, BSTR* name_part);
+	STDMETHOD(OnPreGetUpdateArt)(LONG id_local, VARIANT_BOOL *received
+						, DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos
+						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
+						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
 	STDMETHOD(OnGetUpdateArt)(LONG id_local, LONG id_part
 							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z);
 	STDMETHOD(OnPushUpdateArt)(LONG id_local, LONG id_part
 							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z);
+	STDMETHOD(OnPostPushUpdateArt)(LONG id_local
+						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
+						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
+						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat);
 private:
 	CCvedDistriMsgQ* m_pCvedMsgQ;
 	CVED::IExternalObjectControl* m_pExternalCtrl;

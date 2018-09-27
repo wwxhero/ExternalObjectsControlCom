@@ -51,17 +51,21 @@ interface IDistriObjsCtrl : IDispatch{
 							, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
 							, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
 							, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
-	[id(14)] HRESULT OnPushUpdate([in] LONG id_local
-							, [in] DOUBLE xPos, [in] DOUBLE yPos, [in] DOUBLE zPos
-							, [in] DOUBLE xTan, [in] DOUBLE yTan, [in] DOUBLE zTan
-							, [in] DOUBLE xLat, [in] DOUBLE yLat, [in] DOUBLE zLat);
-	[id(15)] HRESULT GetcrtPedPartName([in] LONG id_local
+	[id(14)] HRESULT GetcrtPedPartName([in] LONG id_local
 							, [in] LONG id_part
 							, [out] BSTR* name_part);
+	[id(15)] HRESULT OnPreGetUpdateArt([in] LONG id_local, [out] VARIANT_BOOL* received
+							, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
+							, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
+							, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
 	[id(16)] HRESULT OnGetUpdateArt([in] LONG id_local, [in] LONG id_part
 							, [out] DOUBLE* w, [out] DOUBLE* x, [out] DOUBLE* y, [out] DOUBLE* z);
 	[id(17)] HRESULT OnPushUpdateArt([in] LONG id_local, [in] LONG id_part
 							, [in] DOUBLE w, [in] DOUBLE x, [in] DOUBLE y, [in] DOUBLE z);
+	[id(18)] HRESULT OnPostPushUpdateArt([in] LONG id_local
+							, [in] DOUBLE xPos, [in] DOUBLE yPos, [in] DOUBLE zPos
+							, [in] DOUBLE xTan, [in] DOUBLE yTan, [in] DOUBLE zTan
+							, [in] DOUBLE xLat, [in] DOUBLE yLat, [in] DOUBLE zLat);
 };
 [
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),

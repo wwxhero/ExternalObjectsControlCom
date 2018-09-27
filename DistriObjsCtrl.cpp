@@ -302,7 +302,40 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdate(LONG id_local, VARIANT_BOOL *received
 	return S_OK;
 }
 
-STDMETHODIMP CDistriObjsCtrl::OnPushUpdate(LONG id_local
+STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *received
+						, DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos
+						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
+						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
+{
+	ATLASSERT(NULL != m_pExternalCtrl);
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("%s = OnPreGetUpdateArt(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
+				, *received?_T("true"):_T("false"), id_local
+				, *xPos, *yPos, *zPos
+				, *xTan, *yTan, *zTan
+				, *xLat, *yLat, *zLat);
+	_AtlModule.LogEventEx(13, strLog);
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
+							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z)
+{
+	ATLASSERT(NULL != m_pExternalCtrl);
+	//m_pExternalCtrl->OnGetUpdateArt(id_local, id_part
+	//					, w, x, y, z);
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("OnGetUpdateArt(%d, %d, %f, %f, %f, %f)")
+				, id_local, id_part, *w, *x, *y, *z));
+	_AtlModule.LogEventEx(16, strLog);
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
 						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
 						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat)
@@ -327,7 +360,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPushUpdate(LONG id_local
 
 #ifdef _DEBUG
 	CString strLog;
-	strLog.Format(_T("OnPushUpdate(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
+	strLog.Format(_T("OnPostPushUpdateArt(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
 				, id_local
 				, xPos, yPos, zPos
 				, xTan, yTan, zTan
@@ -354,20 +387,7 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_local, LONG id_part, BST
 	return S_OK;
 }
 
-STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
-							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z)
-{
-	ATLASSERT(NULL != m_pExternalCtrl);
-	m_pExternalCtrl->OnGetUpdateArt(id_local, id_part
-						, w, x, y, z);
-#ifdef _DEBUG
-	CString strLog;
-	strLog.Format(_T("OnGetUpdateArt(%d, %d, %f, %f, %f, %f))
-				, id_local, id_part, *w, *x, *y, *z));
-	_AtlModule.LogEventEx(16, strLog);
-#endif
-	return S_OK;
-}
+
 STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
 							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z)
 {
