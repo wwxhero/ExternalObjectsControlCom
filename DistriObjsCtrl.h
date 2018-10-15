@@ -100,7 +100,12 @@ public:
 private:
 	CCvedDistriMsgQ* m_pCvedMsgQ;
 	CVED::IExternalObjectControl* m_pExternalCtrl;
-
+	typedef struct
+	{
+		TVector3D* angles;
+		unsigned int num;
+	} Joints;
+	std::map<LONG, Joints> m_idLocal2jointAngles;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(DistriObjsCtrl), CDistriObjsCtrl)

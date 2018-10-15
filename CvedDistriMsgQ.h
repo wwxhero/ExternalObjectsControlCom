@@ -92,8 +92,8 @@ private:
 			double xPos, yPos, zPos;
 			double xTan, yTan, zTan;
 			double xLat, yLat, zLat;
-			long nPart;
-			std::string* partNames;
+			unsigned int nPart;
+			const char** partNames;
 		} ParamCrtPed;
 		struct delPed
 		{

@@ -4,8 +4,10 @@
 #include "DistriObjsCtrl.h"
 #include "dllmain.h"
 #include "CvedAdoCtrl.h"
-// CDistriObjsCtrl
 
+// CDistriObjsCtrl
+extern void TaitBran2Quaternion(double i, double j, double k, double *w, double *x, double *y, double *z);
+extern void Quaternion2Taitbran(double w, double x, double y, double z, double *i, double *j, double *k);
 
 
 STDMETHODIMP CDistriObjsCtrl::CreateNetworkExternalObjectControl(LONG imple, LONG terminal)
@@ -218,6 +220,9 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 							nParts);
 	_bstr_t bName(strName.c_str());
 	*name = bName;
+	Joints joints = {new TVector3D[*nParts], *nParts};
+	ATLASSERT(m_idLocal2jointAngles.find(*id_local) == m_idLocal2jointAngles.end());
+	m_idLocal2jointAngles[*id_local] = joints;
 #ifdef _DEBUG
 	CString strLog;
 
@@ -236,10 +241,32 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 	return S_OK;
 }
 
+STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_local, LONG id_part, BSTR *name_part)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	std::string partName;
+	m_pCvedMsgQ->crtPedPartName(id_local, id_part, partName);
+	_bstr_t bName(partName.c_str());
+	*name_part = bName;
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("GetcrtPedPartName(%d, %s)")
+				, id_part
+				, partName.c_str());
+	_AtlModule.LogEventEx(15, strLog);
+#endif
+	return S_OK;
+}
+
 STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
 {
 	ATLASSERT(NULL != m_pCvedMsgQ);
 	m_pCvedMsgQ->delPedParams(id_local);
+	auto it = m_idLocal2jointAngles.find(*id_local);
+	ATLASSERT(it != m_idLocal2jointAngles.end());
+	auto joints = it->second;
+	delete [] joints.angles;
+	m_idLocal2jointAngles.erase(it);
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("GetdelPedTuple(%d)"), *id_local);
@@ -308,6 +335,28 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
+	cvTObjState outp;
+	if (*received = m_pExternalCtrl->OnGetUpdateArt(id_local, &outp))
+	{
+		*xPos = outp.vehicleState.vehState.position.x;
+		*yPos = outp.vehicleState.vehState.position.y;
+		*zPos = outp.vehicleState.vehState.position.z;
+
+		*xTan = outp.vehicleState.vehState.tangent.i;
+		*yTan = outp.vehicleState.vehState.tangent.j;
+		*zTan = outp.vehicleState.vehState.tangent.k;
+
+		*xLat = outp.vehicleState.vehState.lateral.i;
+		*yLat = outp.vehicleState.vehState.lateral.j;
+		*zLat = outp.vehicleState.vehState.lateral.k;
+
+		auto it = m_idLocal2jointAngles.find(id_local);
+		ATLASSERT(it != m_idLocal2jointAngles.end());
+		Joints joints = it->second;
+		const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+		ATLASSERT(cvEObjType::eCV_AVATAR == pObj->GetType());
+		static_cast<const CVED::CAvatarObj*>(pObj)->BFTFillAngles(joints.angles, joints.num);
+	}
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("%s = OnPreGetUpdateArt(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
@@ -324,12 +373,17 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
 							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
-	//m_pExternalCtrl->OnGetUpdateArt(id_local, id_part
-	//					, w, x, y, z);
+	auto it = m_idLocal2jointAngles.find(id_local);
+	ATLASSERT(it != m_idLocal2jointAngles.end());
+	Joints joints = it->second;
+	ATLASSERT(id_part < joints.num);
+	const TVector3D& tb = joints.angles[id_part];
+	TaitBran2Quaternion(tb.i, tb.j, tb.k
+					, w, x, y, z);
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("OnGetUpdateArt(%d, %d, %f, %f, %f, %f)")
-				, id_local, id_part, *w, *x, *y, *z));
+				, id_local, id_part, *w, *x, *y, *z);
 	_AtlModule.LogEventEx(16, strLog);
 #endif
 	return S_OK;
@@ -370,37 +424,26 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 	return S_OK;
 }
 
-STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_local, LONG id_part, BSTR *name_part)
-{
-	ATLASSERT(NULL != m_pCvedMsgQ);
-	std::string partName;
-	m_pCvedMsgQ->crtPedPartName(id_local, id_part, partName);
-	_bstr_t bName(partName.c_str());
-	*name_part = bName;
-#ifdef _DEBUG
-	CString strLog;
-	strLog.Format(_T("GetcrtPedPartName(%d, %s)")
-				, id_part
-				, partName.c_str());
-	_AtlModule.LogEventEx(15, strLog);
-#endif
-	return S_OK;
-}
+
 
 
 STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
 							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
-	m_pExternalCtrl->OnPushUpdateArt(id_local, id_part
-							, w, x, y, z);
+	//m_pExternalCtrl->OnPushUpdateArt();
+	auto it = m_idLocal2jointAngles.find(id_local);
+	ATLASSERT(it != m_idLocal2jointAngles.end());
+	Joints joints = it->second;
+	ATLASSERT(id_part < joints.num);
+	TVector3D& tb = joints.angles[id_part];
+	Quaternion2Taitbran(w, x, y, z
+					, &tb.i, &tb.j, &tb.k);
 #ifdef _DEBUG
-	#ifdef _DEBUG
 	CString strLog;
-	strLog.Format(_T("OnPushUpdateArt(%d, %d, %f, %f, %f, %f))
-				, id_local, id_part, *w, *x, *y, *z));
+	strLog.Format(_T("OnPushUpdateArt(%d, %d, %f, %f, %f, %f)")
+				, id_local, id_part, w, x, y, z);
 	_AtlModule.LogEventEx(16, strLog);
-#endif
 #endif
 	return S_OK;
 }
