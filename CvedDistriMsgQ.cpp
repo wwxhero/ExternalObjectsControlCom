@@ -32,8 +32,8 @@ void CCvedDistriMsgQ::pop()
 	if (crtPed == param.ParamDef.evt)
 	{
 		const CVED::CDynObj* avatar = BindObjIdToClass(param.ParamCrtPed.id_local);
-		ATLASSERT(cvEObjType::eCV_AVATAR == avatar->GetType());
-		static_cast<const CVED::CAvatarObj*>(avatar)->BFTFree(param.ParamCrtPed.partNames, param.ParamCrtPed.nPart);
+		ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == avatar->GetType());
+		static_cast<const CVED::CExternalAvatarObj*>(avatar)->BFTFree(param.ParamCrtPed.partNames, param.ParamCrtPed.nPart);
 	}
 }
 void CCvedDistriMsgQ::crtDynoParams(long* id_local, std::string& name, long* solId
@@ -166,7 +166,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 												const CVector3D*	cpInitLat)
 {
 	//todo: record a message for creating dyn obj
-	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_AVATAR, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_AVATAR, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
@@ -187,7 +187,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 		param.ParamCrtPed.xLat = cpInitLat->m_i;
 		param.ParamCrtPed.yLat = cpInitLat->m_j;
 		param.ParamCrtPed.zLat = cpInitLat->m_k;
-		static_cast<CVED::CAvatarObj*>(obj)->BFTAlloc(&param.ParamCrtPed.partNames, &param.ParamCrtPed.nPart);
+		static_cast<CVED::CExternalAvatarObj*>(obj)->BFTAlloc(param.ParamCrtPed.name, &param.ParamCrtPed.partNames, &param.ParamCrtPed.nPart);
 		if (m_msgQ.full())
 		{
 			m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);

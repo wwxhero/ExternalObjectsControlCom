@@ -335,7 +335,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
-	cvTObjState outp;
+	cvTObjState outp;//fixme: state should come from object(id_local)
 	if (*received = m_pExternalCtrl->OnGetUpdateArt(id_local, &outp))
 	{
 		*xPos = outp.vehicleState.vehState.position.x;
@@ -354,8 +354,8 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 		ATLASSERT(it != m_idLocal2jointAngles.end());
 		Joints joints = it->second;
 		const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
-		ATLASSERT(cvEObjType::eCV_AVATAR == pObj->GetType());
-		static_cast<const CVED::CAvatarObj*>(pObj)->BFTFillAngles(joints.angles, joints.num);
+		ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
+		static_cast<const CVED::CExternalAvatarObj*>(pObj)->BFTFillAnglesOut(joints.angles, joints.num);
 	}
 #ifdef _DEBUG
 	CString strLog;
@@ -394,6 +394,14 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
 						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat)
 {
+	auto it = m_idLocal2jointAngles.find(id_local);
+	ATLASSERT(it != m_idLocal2jointAngles.end());
+	Joints joints = it->second;
+
+	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
+	static_cast<const CVED::CExternalAvatarObj*>(pObj)->BFTFillAnglesIn(joints.angles, joints.num);
+
 	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
 	cvTObjState s = {0};
 
