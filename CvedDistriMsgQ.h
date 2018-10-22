@@ -25,6 +25,8 @@ public:
 					, double *xTan, double *yTan, double *zTan
 					, double *xLat, double *yLat, double *zLat);
 	void delPedParams(long* id_local);
+
+	void BindStateBuff(long id_local, cvTObjContInp** inp, cvTObjState** s);
 protected:
 	virtual CVED::CDynObj* LocalCreateEDO(
 					const string&		cName,
