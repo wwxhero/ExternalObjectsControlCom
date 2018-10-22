@@ -102,10 +102,11 @@ private:
 	CVED::IExternalObjectControl* m_pExternalCtrl;
 	typedef struct
 	{
+		const char** names;
 		TVector3D* angles;
 		unsigned int num;
 	} Joints;
-	std::map<LONG, Joints> m_idLocal2jointAngles;
+	std::map<LONG, Joints> m_idLocal2jointAngles; //fixme: to be optimized to O(1) access time
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(DistriObjsCtrl), CDistriObjsCtrl)

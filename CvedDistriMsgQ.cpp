@@ -30,12 +30,6 @@ void CCvedDistriMsgQ::pop()
 	//todo: pops front element
 	Param param = m_msgQ.front();
 	m_msgQ.pop_front();
-	if (crtPed == param.ParamDef.evt)
-	{
-		const CVED::CDynObj* avatar = BindObjIdToClass(param.ParamCrtPed.id_local);
-		ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == avatar->GetType());
-		static_cast<const CVED::CExternalAvatarObj*>(avatar)->BFTFree(param.ParamCrtPed.partNames, param.ParamCrtPed.nPart);
-	}
 }
 void CCvedDistriMsgQ::crtDynoParams(long* id_local, std::string& name, long* solId
 				, double *xSize, double *ySize, double *zSize
@@ -188,7 +182,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 		param.ParamCrtPed.xLat = cpInitLat->m_i;
 		param.ParamCrtPed.yLat = cpInitLat->m_j;
 		param.ParamCrtPed.zLat = cpInitLat->m_k;
-		static_cast<CVED::CExternalAvatarObj*>(obj)->BFTAlloc(param.ParamCrtPed.name, &param.ParamCrtPed.partNames, &param.ParamCrtPed.nPart);
+		param.ParamCrtPed.nPart = static_cast<CVED::CExternalAvatarObj*>(obj)->GetNumParts();
 		if (m_msgQ.full())
 		{
 			m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);

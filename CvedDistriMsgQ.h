@@ -95,7 +95,6 @@ private:
 			double xTan, yTan, zTan;
 			double xLat, yLat, zLat;
 			unsigned int nPart;
-			const char** partNames;
 		} ParamCrtPed;
 		struct delPed
 		{
