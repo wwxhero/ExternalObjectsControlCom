@@ -277,7 +277,8 @@ STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
 
 STDMETHODIMP CDistriObjsCtrl::PreUpdateDynamicModels(void)
 {
-	ATLASSERT(NULL != m_pExternalCtrl);
+	ATLASSERT(NULL != m_pExternalCtrl && NULL != m_pCvedMsgQ);
+	m_pCvedMsgQ->Maintainer();
 	m_pExternalCtrl->PreUpdateDynamicModels();
 #ifdef _DEBUG
 	_AtlModule.LogEventEx(11, _T("PreUpdateDynamicModels"));
@@ -300,22 +301,23 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdate(LONG id_local, VARIANT_BOOL *received
 						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
 {
-	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
-	cvTObjState outp;
+	cvTObjContInp* inp = NULL; //for vrlink implementation, this parameter is useless
+	cvTObjState* outp = NULL;
+	m_pCvedMsgQ->BindStateBuff(id_local, &inp, &outp);
 	ATLASSERT(NULL != m_pExternalCtrl);
-	if (*received = m_pExternalCtrl->OnGetUpdate(id_local, &inp, &outp))
+	if (*received = m_pExternalCtrl->OnGetUpdate(id_local, inp, outp))
 	{
-		*xPos = outp.vehicleState.vehState.position.x;
-		*yPos = outp.vehicleState.vehState.position.y;
-		*zPos = outp.vehicleState.vehState.position.z;
+		*xPos = outp->vehicleState.vehState.position.x;
+		*yPos = outp->vehicleState.vehState.position.y;
+		*zPos = outp->vehicleState.vehState.position.z;
 
-		*xTan = outp.vehicleState.vehState.tangent.i;
-		*yTan = outp.vehicleState.vehState.tangent.j;
-		*zTan = outp.vehicleState.vehState.tangent.k;
+		*xTan = outp->vehicleState.vehState.tangent.i;
+		*yTan = outp->vehicleState.vehState.tangent.j;
+		*zTan = outp->vehicleState.vehState.tangent.k;
 
-		*xLat = outp.vehicleState.vehState.lateral.i;
-		*yLat = outp.vehicleState.vehState.lateral.j;
-		*zLat = outp.vehicleState.vehState.lateral.k;
+		*xLat = outp->vehicleState.vehState.lateral.i;
+		*yLat = outp->vehicleState.vehState.lateral.j;
+		*zLat = outp->vehicleState.vehState.lateral.k;
 	}
 #ifdef _DEBUG
 	CString strLog;
@@ -335,29 +337,31 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
-	cvTObjState outp;//fixme: state should come from object(id_local)
-	if (*received = m_pExternalCtrl->OnGetUpdateArt(id_local, &outp))
+	cvTObjState* outp = NULL;
+	cvTObjContInp* outInp = NULL;
+	m_pCvedMsgQ->BindStateBuff(id_local, &outInp, &outp);
+	if (*received = m_pExternalCtrl->OnGetUpdateArt(id_local, outp))
 	{
-		*xPos = outp.vehicleState.vehState.position.x;
-		*yPos = outp.vehicleState.vehState.position.y;
-		*zPos = outp.vehicleState.vehState.position.z;
+		*xPos = outp->vehicleState.vehState.position.x;
+		*yPos = outp->vehicleState.vehState.position.y;
+		*zPos = outp->vehicleState.vehState.position.z;
 
-		*xTan = outp.vehicleState.vehState.tangent.i;
-		*yTan = outp.vehicleState.vehState.tangent.j;
-		*zTan = outp.vehicleState.vehState.tangent.k;
+		*xTan = outp->vehicleState.vehState.tangent.i;
+		*yTan = outp->vehicleState.vehState.tangent.j;
+		*zTan = outp->vehicleState.vehState.tangent.k;
 
-		*xLat = outp.vehicleState.vehState.lateral.i;
-		*yLat = outp.vehicleState.vehState.lateral.j;
-		*zLat = outp.vehicleState.vehState.lateral.k;
+		*xLat = outp->vehicleState.vehState.lateral.i;
+		*yLat = outp->vehicleState.vehState.lateral.j;
+		*zLat = outp->vehicleState.vehState.lateral.k;
 
 		auto it = m_idLocal2jointAngles.find(id_local);
 		ATLASSERT(it != m_idLocal2jointAngles.end());
 		Joints joints = it->second;
-		const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
-		ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
-		static_cast<const CVED::CExternalAvatarObj*>(pObj)->BFTFillAnglesOut(joints.angles, joints.num);
+		CVED::CExternalAvatarObj::BFTGetJoints(outp, joints.angles, joints.num);
 	}
 #ifdef _DEBUG
+	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
 	CString strLog;
 	strLog.Format(_T("%s = OnPreGetUpdateArt(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
 				, *received?_T("true"):_T("false"), id_local
@@ -394,33 +398,34 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
 						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat)
 {
+	cvTObjContInp* inp = NULL; //for vrlink implementation, this parameter is useless
+	cvTObjState* s = NULL;
+
+	m_pCvedMsgQ->BindStateBuff(id_local, &inp, &s);
+
 	auto it = m_idLocal2jointAngles.find(id_local);
 	ATLASSERT(it != m_idLocal2jointAngles.end());
 	Joints joints = it->second;
+	CVED::CExternalAvatarObj::BFTSetJoints(s, joints.angles, joints.num);
 
-	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
-	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
-	static_cast<const CVED::CExternalAvatarObj*>(pObj)->BFTFillAnglesIn(joints.angles, joints.num);
+	s->vehicleState.vehState.position.x = xPos;
+	s->vehicleState.vehState.position.y = yPos;
+	s->vehicleState.vehState.position.z = zPos;
 
-	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
-	cvTObjState s = {0};
+	s->vehicleState.vehState.tangent.i = xTan;
+	s->vehicleState.vehState.tangent.j = yTan;
+	s->vehicleState.vehState.tangent.k = zTan;
 
-	s.vehicleState.vehState.position.x = xPos;
-	s.vehicleState.vehState.position.y = yPos;
-	s.vehicleState.vehState.position.z = zPos;
-
-	s.vehicleState.vehState.tangent.i = xTan;
-	s.vehicleState.vehState.tangent.j = yTan;
-	s.vehicleState.vehState.tangent.k = zTan;
-
-	s.vehicleState.vehState.lateral.i = xLat;
-	s.vehicleState.vehState.lateral.j = yLat;
-	s.vehicleState.vehState.lateral.k = zLat;
+	s->vehicleState.vehState.lateral.i = xLat;
+	s->vehicleState.vehState.lateral.j = yLat;
+	s->vehicleState.vehState.lateral.k = zLat;
 
 	ATLASSERT(NULL != m_pExternalCtrl);
-	m_pExternalCtrl->OnPushUpdate(id_local, &inp, &s);
+	m_pExternalCtrl->OnPushUpdate(id_local, inp, s);
 
 #ifdef _DEBUG
+	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
 	CString strLog;
 	strLog.Format(_T("OnPostPushUpdateArt(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
 				, id_local

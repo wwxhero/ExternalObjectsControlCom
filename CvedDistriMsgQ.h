@@ -27,6 +27,8 @@ public:
 					, long *nPart);
 	void crtPedPartName(long id_local, long id_part, std::string& name);
 	void delPedParams(long* id_local);
+
+	void BindStateBuff(long id_local, cvTObjContInp** inp, cvTObjState** s);
 protected:
 	virtual CVED::CDynObj* LocalCreateEDO(
 					const string&		cName,

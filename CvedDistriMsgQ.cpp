@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "CvedDistriMsgQ.h"
+#include "cvedstrc.h"
 #define INIT_BUFF_CNT 32
 #define DELTA_BUFF_CNT 32
 
@@ -269,5 +270,27 @@ CVED::CDynObj*	CCvedDistriMsgQ::DistriCreateADO(const string&		cName,
 void		CCvedDistriMsgQ::DistriDeleteADO(CVED::CDynObj*)
 {
 	ATLASSERT(0);
+}
+
+void CCvedDistriMsgQ::BindStateBuff(long id_local, cvTObjContInp** inp, cvTObjState** s)
+{
+	TObj* pO = BindObj(id_local);
+	ATLASSERT((pO->type == eCV_VEHICLE || pO->type == eCV_EXTERNAL_DRIVER)
+			&& (pO->phase == eALIVE || pO->phase == eDYING));
+
+	if( (m_pHdr->frame & 1) == 0 )
+	{
+		// even frame
+		*inp = &pO->stateBufA.contInp;
+		//currState    = pO->stateBufB.state;
+		*s = &pO->stateBufB.state;
+	}
+	else
+	{
+		// odd frame
+		*inp = &pO->stateBufB.contInp;
+		//currState    = pO->stateBufA.state;
+		*s = &pO->stateBufA.state;
+	}
 }
 
