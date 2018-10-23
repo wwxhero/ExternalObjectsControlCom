@@ -85,7 +85,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreateEDO(
 										const CVector3D*	cpInitTan,
 										const CVector3D*	cpInitLat)
 {
-	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CVED::CDynObj* obj = CCved::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
@@ -123,7 +123,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreateADO(
 										const CVector3D*	cpInitLat)
 {
 	//todo: record a message for creating dyn obj
-	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CVED::CDynObj* obj = CCved::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
@@ -161,7 +161,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 												const CVector3D*	cpInitLat)
 {
 	//todo: record a message for creating dyn obj
-	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_AVATAR, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(own, cName, eCV_EXTERNAL_AVATAR, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
@@ -263,7 +263,7 @@ void		CCvedDistriMsgQ::DistriDeleteADO(CVED::CDynObj*)
 void CCvedDistriMsgQ::BindStateBuff(long id_local, cvTObjContInp** inp, cvTObjState** s)
 {
 	TObj* pO = BindObj(id_local);
-	ATLASSERT((pO->type == eCV_VEHICLE || pO->type == eCV_EXTERNAL_DRIVER)
+	ATLASSERT((pO->type == eCV_VEHICLE || pO->type == eCV_EXTERNAL_DRIVER || pO->type == eCV_EXTERNAL_AVATAR)
 			&& (pO->phase == eALIVE || pO->phase == eDYING));
 
 	if( (m_pHdr->frame & 1) == 0 )

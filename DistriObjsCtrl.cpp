@@ -239,11 +239,19 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 									_T("\n\t%f, %f, %f")
 									_T("\n\t%f, %f, %f")
 									_T("\n\t%f, %f, %f")
+									_T("\n\t%d")
 									, *id_local, strName.c_str(), *solId
 									, *xSize, *ySize, *zSize
 									, *xPos, *yPos, *zPos
 									, *xTan, *yTan, *zTan
-									, *xLat, *yLat, *zLat);
+									, *xLat, *yLat, *zLat
+									, *nParts);
+	for (int i_part = 0; i_part < *nParts; i_part ++)
+	{
+		CString strPartName;
+		strPartName.Format(_T("\n\t\t%d:%s"), i_part, names_joint[i_part]);
+		strLog += strPartName;
+	}
 	_AtlModule.LogEventEx(9, strLog);
 #endif
 	return S_OK;
@@ -433,7 +441,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 	s->vehicleState.vehState.lateral.k = zLat;
 
 	ATLASSERT(NULL != m_pExternalCtrl);
-	m_pExternalCtrl->OnPushUpdate(id_local, inp, s);
+	m_pExternalCtrl->OnPushUpdateArt(id_local, s);
 
 #ifdef _DEBUG
 	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);

@@ -18,6 +18,7 @@ public :
 		_In_opt_z_ LPCTSTR pszMessage=NULL,
 		_In_ WORD type = EVENTLOG_INFORMATION_TYPE) throw()
 	{
+#ifdef SYSTEM_LOG
 			/* Get a handle to use with ReportEvent(). */
 			if (m_hEventSource != NULL)
 			{
@@ -32,6 +33,10 @@ public :
 							pszMessage != NULL ? &pszMessage : NULL,
 							NULL);
 			}
+#else
+			ATLTRACE(pszMessage);
+			ATLTRACE(_T("\n"));
+#endif
 	}
 private:
 	HANDLE m_hEventSource;
