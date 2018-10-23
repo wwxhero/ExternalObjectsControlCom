@@ -4,6 +4,7 @@
 #include "DistriObjsCtrl.h"
 #include "dllmain.h"
 #include "CvedAdoCtrl.h"
+#include "dynobj.h"
 
 // CDistriObjsCtrl
 extern void TaitBran2Quaternion(double i, double j, double k, double *w, double *x, double *y, double *z);
@@ -223,9 +224,9 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 
 	const char** names_joint = NULL;
 	unsigned int numJoints = 0;
-	CDynObj* pDynObj = m_pCvedMsgQ->BindObjIdToClass(*id_local);
+	const CVED::CDynObj* pDynObj = m_pCvedMsgQ->BindObjIdToClass(*id_local);
 	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pDynObj->GetType());
-	static_cast<CExternalAvatarObj*>(pDynObj)->BFTAlloc(&names_joint, numJoints);
+	static_cast<const CVED::CExternalAvatarObj*>(pDynObj)->BFTAlloc(strName.c_str(), &names_joint, &numJoints);
 	ATLASSERT(numJoints == *nParts);
 	Joints joints = {names_joint, new TVector3D[*nParts], *nParts};
 	ATLASSERT(m_idLocal2jointAngles.find(*id_local) == m_idLocal2jointAngles.end());
@@ -250,16 +251,16 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 
 STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_local, LONG id_part, BSTR *name_part)
 {
-	ATLASSERT(NULL != m_pCvedMsgQ);
-	std::string partName;
-	m_pCvedMsgQ->crtPedPartName(id_local, id_part, partName);
-	_bstr_t bName(partName.c_str());
+	auto it = m_idLocal2jointAngles.find(id_local);
+	ATLASSERT(it != m_idLocal2jointAngles.end());
+	Joints joints = it->second;
+	_bstr_t bName(joints.names[id_part]);
 	*name_part = bName;
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("GetcrtPedPartName(%d, %s)")
 				, id_part
-				, partName.c_str());
+				, joints.names[id_part]);
 	_AtlModule.LogEventEx(15, strLog);
 #endif
 	return S_OK;
@@ -272,7 +273,7 @@ STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
 	auto it = m_idLocal2jointAngles.find(*id_local);
 	ATLASSERT(it != m_idLocal2jointAngles.end());
 	auto joints = it->second;
-	const CVED::CDynObj* avatar = BindObjIdToClass(*id_local);
+	const CVED::CDynObj* avatar = m_pCvedMsgQ->BindObjIdToClass(*id_local);
 	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == avatar->GetType());
 	static_cast<const CVED::CExternalAvatarObj*>(avatar)->BFTFree(joints.names, joints.num);
 	delete [] joints.angles;

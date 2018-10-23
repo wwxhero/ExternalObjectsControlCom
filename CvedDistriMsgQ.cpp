@@ -235,13 +235,7 @@ void CCvedDistriMsgQ::crtPedParams(long* id_local, std::string& name, long* solI
 	*nPart = param.ParamCrtPed.nPart;
 }
 
-void CCvedDistriMsgQ::crtPedPartName(long id_local, long id_part, std::string& name)
-{
-	Param param = m_msgQ.front();
-	ATLASSERT(param.ParamDef.evt == crtPed
-		&& id_local == param.ParamCrtPed.id_local);
-	name = param.ParamCrtPed.partNames[id_part];
-}
+
 
 void CCvedDistriMsgQ::delPedParams(long* id_local)
 {
