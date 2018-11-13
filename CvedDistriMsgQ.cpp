@@ -183,7 +183,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 		param.ParamCrtPed.xLat = cpInitLat->m_i;
 		param.ParamCrtPed.yLat = cpInitLat->m_j;
 		param.ParamCrtPed.zLat = cpInitLat->m_k;
-		param.ParamCrtPed.nPart = static_cast<CVED::CExternalAvatarObj*>(obj)->GetNumParts();
+		param.ParamCrtPed.nPart = CVED::CArtiJoints::GetNumParts();
 		if (m_msgQ.full())
 		{
 			m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);
