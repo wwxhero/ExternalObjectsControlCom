@@ -5,6 +5,10 @@
 #include "dllmain.h"
 #include "CvedAdoCtrl.h"
 #include "dynobj.h"
+#define PI 3.1416
+
+#define RAD2DEG(r)\
+	(int)((r/PI)*180)
 
 // CDistriObjsCtrl
 extern void TaitBran2Quaternion(double i, double j, double k, double *w, double *x, double *y, double *z);
@@ -470,7 +474,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 				, xPos, yPos, zPos
 				, xTan, yTan, zTan
 				, xLat, yLat, zLat);
-	_AtlModule.LogEventEx(14, strLog);
+	_AtlModule.LogEventEx(17, strLog);
 #endif
 	return S_OK;
 }
@@ -494,7 +498,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
 	CString strLog;
 	strLog.Format(_T("OnPushUpdateArt(%d, %d, %f, %f, %f, %f)")
 				, id_local, id_part, w, x, y, z);
-	_AtlModule.LogEventEx(16, strLog);
+	_AtlModule.LogEventEx(18, strLog);
 #endif
 	return S_OK;
 }
