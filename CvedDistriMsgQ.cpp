@@ -85,7 +85,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreateEDO(
 										const CVector3D*	cpInitTan,
 										const CVector3D*	cpInitLat)
 {
-	CVED::CDynObj* obj = CCved::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
@@ -123,7 +123,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreateADO(
 										const CVector3D*	cpInitLat)
 {
 	//todo: record a message for creating dyn obj
-	CVED::CDynObj* obj = CCved::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
