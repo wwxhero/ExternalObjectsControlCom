@@ -415,6 +415,30 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
 	return S_OK;
 }
 
+STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* joints)
+{
+#define NUM_JOINTS  15
+	TVector3D angles[NUM_JOINTS] = {0};//fixme: this interface is for testing only
+	const char* names[NUM_JOINTS] = {NULL};
+	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+	ATLASSERT(pObj->GetType() == eCV_AVATAR);
+	const CVED::CAvatarObj* avatar = (const CVED::CAvatarObj*)pObj;
+	unsigned int num = avatar->BFTGetJointsDiGuy(names, angles, NUM_JOINTS);
+	ATLASSERT(num == NUM_JOINTS);
+	for (int i_j = 0; i_j <= NUM_JOINTS; i_j ++)
+	{
+		CString strLogItem;
+		strLogItem.Format(" \n\t\t%2d:%20s\t=\t%4d\t%4d\t%4d", i_j, names[i_j], RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j));
+		FLOAT* joint = joints + i_j * 3;
+		joint[0] = angles[i_j].k;
+		joint[1] = angles[i_j].i;
+		joint[2] = angles[i_j].j;
+		_AtlModule.LogEventEx(19, strLogItem);
+	}
+	return S_OK;
+#undef NUM_JOINTS
+}
+
 STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
 						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan

@@ -66,6 +66,7 @@ interface IDistriObjsCtrl : IDispatch{
 							, [in] DOUBLE xPos, [in] DOUBLE yPos, [in] DOUBLE zPos
 							, [in] DOUBLE xTan, [in] DOUBLE yTan, [in] DOUBLE zTan
 							, [in] DOUBLE xLat, [in] DOUBLE yLat, [in] DOUBLE zLat);
+	[id(19)] HRESULT OnGetUpdateArtDIGUY([in] LONG id_local, [in, out] FLOAT* joints);
 };
 [
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),
