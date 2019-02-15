@@ -425,7 +425,7 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* joints)
 	const CVED::CAvatarObj* avatar = (const CVED::CAvatarObj*)pObj;
 	unsigned int num = avatar->BFTGetJointsDiGuy(names, angles, NUM_JOINTS);
 	ATLASSERT(num == NUM_JOINTS);
-	for (int i_j = 0; i_j <= NUM_JOINTS; i_j ++)
+	for (int i_j = 0; i_j < NUM_JOINTS; i_j ++)
 	{
 		CString strLogItem;
 		strLogItem.Format(" \n\t\t%2d:%20s\t=\t%4d\t%4d\t%4d", i_j, names[i_j], RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j));

@@ -9,18 +9,4 @@
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="ExternalObjectsControlComps.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ExternalObjectsControlCom_i.c">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ExternalObjectsControlCom_p.c">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dlldata.c">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-  </ItemGroup>
 </Project>
