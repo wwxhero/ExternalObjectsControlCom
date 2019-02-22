@@ -59,9 +59,11 @@ interface IDistriObjsCtrl : IDispatch{
 							, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
 							, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
 	[id(16)] HRESULT OnGetUpdateArt([in] LONG id_local, [in] LONG id_part
-							, [out] DOUBLE* w, [out] DOUBLE* x, [out] DOUBLE* y, [out] DOUBLE* z);
+							, [out] DOUBLE* w, [out] DOUBLE* x, [out] DOUBLE* y, [out] DOUBLE* z
+							, [out] DOUBLE* dx, [out] DOUBLE* dy, [out] DOUBLE* dz);
 	[id(17)] HRESULT OnPushUpdateArt([in] LONG id_local, [in] LONG id_part
-							, [in] DOUBLE w, [in] DOUBLE x, [in] DOUBLE y, [in] DOUBLE z);
+							, [in] DOUBLE w, [in] DOUBLE x, [in] DOUBLE y, [in] DOUBLE z
+							, [in] DOUBLE dx, [in] DOUBLE dy, [in] DOUBLE dz);
 	[id(18)] HRESULT OnPostPushUpdateArt([in] LONG id_local
 							, [in] DOUBLE xPos, [in] DOUBLE yPos, [in] DOUBLE zPos
 							, [in] DOUBLE xTan, [in] DOUBLE yTan, [in] DOUBLE zTan

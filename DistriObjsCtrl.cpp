@@ -231,7 +231,7 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 	const CVED::CDynObj* pDynObj = m_pCvedMsgQ->BindObjIdToClass(*id_local);
 	CVED::CArtiJoints::BFTAlloc(strName.c_str(), &names_joint, &numJoints);
 	ATLASSERT(numJoints == *nParts);
-	Joints joints = {names_joint, new TVector3D[*nParts], *nParts};
+	Joints joints = {names_joint, new TVector3D[*nParts], new TVector3D[*nParts], *nParts};
 	ATLASSERT(m_idLocal2jointAngles.find(*id_local) == m_idLocal2jointAngles.end());
 	m_idLocal2jointAngles[*id_local] = joints;
 #ifdef _DEBUG
@@ -286,6 +286,7 @@ STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
 	const CVED::CDynObj* avatar = m_pCvedMsgQ->BindObjIdToClass(*id_local);
 	CVED::CArtiJoints::BFTFree(joints.names, joints.num);
 	delete [] joints.angles;
+	delete [] joints.offsets;
 	m_idLocal2jointAngles.erase(it);
 
 #ifdef _DEBUG
@@ -378,7 +379,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 		auto it = m_idLocal2jointAngles.find(id_local);
 		ATLASSERT(it != m_idLocal2jointAngles.end());
 		Joints joints = it->second;
-		CVED::CArtiJoints::BFTGetJoints(outp, joints.angles, joints.num);
+		CVED::CArtiJoints::BFTGetJoints(outp, joints.angles, joints.offsets, joints.num);
 	}
 #ifdef _DEBUG
 	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
@@ -396,7 +397,8 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 }
 
 STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
-							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z)
+							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z
+							, DOUBLE* dx, DOUBLE* dy, DOUBLE* dz)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
 	auto it = m_idLocal2jointAngles.find(id_local);
@@ -406,6 +408,10 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
 	const TVector3D& tb = joints.angles[id_part];
 	TaitBran2Quaternion(tb.i, tb.j, tb.k
 					, w, x, y, z);
+	const TVector3D& delta = joints.offsets[id_part];
+	*dx = delta.i;
+	*dy = delta.j;
+	*dz = delta.k;
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("OnGetUpdateArt(%d, %d, %f, %f, %f, %f)")
@@ -419,6 +425,7 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* joints)
 {
 #define NUM_JOINTS  15
 	TVector3D angles[NUM_JOINTS] = {0};//fixme: this interface is for testing only
+	TVector3D offsets[NUM_JOINTS] = {0};
 	const char* names[NUM_JOINTS] = {NULL};
 	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
 	ATLASSERT(pObj->GetType() == eCV_AVATAR);
@@ -452,7 +459,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 	auto it = m_idLocal2jointAngles.find(id_local);
 	ATLASSERT(it != m_idLocal2jointAngles.end());
 	Joints joints = it->second;
-	CVED::CArtiJoints::BFTSetJoints(s, joints.angles, joints.num);
+	CVED::CArtiJoints::BFTSetJoints(s, joints.angles, joints.offsets,joints.num);
 
 	s->vehicleState.vehState.position.x = xPos;
 	s->vehicleState.vehState.position.y = yPos;
@@ -487,7 +494,8 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 
 
 STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
-							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z)
+							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z
+							, DOUBLE dx, DOUBLE dy, DOUBLE dz)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
 	//m_pExternalCtrl->OnPushUpdateArt();
@@ -498,6 +506,8 @@ STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
 	TVector3D& tb = joints.angles[id_part];
 	Quaternion2Taitbran(w, x, y, z
 					, &tb.i, &tb.j, &tb.k);
+	TVector3D& os = joints.offsets[id_part];
+	os.i = dx; os.j = dy; os.k = dz;
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("OnPushUpdateArt(%d, %d, %f, %f, %f, %f)")

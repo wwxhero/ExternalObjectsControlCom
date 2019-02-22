@@ -90,10 +90,12 @@ public:
 						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
 	STDMETHOD(OnGetUpdateArt)(LONG id_local, LONG id_part
-							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z);
+							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z
+							, DOUBLE* dx, DOUBLE* dy, DOUBLE* dz);
 	STDMETHOD(OnGetUpdateArtDIGUY)(LONG id_local, FLOAT* joints);
 	STDMETHOD(OnPushUpdateArt)(LONG id_local, LONG id_part
-							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z);
+							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z
+							, DOUBLE dx, DOUBLE dy, DOUBLE dz);
 	STDMETHOD(OnPostPushUpdateArt)(LONG id_local
 						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
 						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
@@ -105,6 +107,7 @@ private:
 	{
 		const char** names;
 		TVector3D* angles;
+		TVector3D* offsets;
 		unsigned int num;
 	} Joints;
 	std::map<LONG, Joints> m_idLocal2jointAngles; //fixme: to be optimized to O(1) access time
