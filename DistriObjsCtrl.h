@@ -92,7 +92,7 @@ public:
 	STDMETHOD(OnGetUpdateArt)(LONG id_local, LONG id_part
 							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z
 							, DOUBLE* dx, DOUBLE* dy, DOUBLE* dz);
-	STDMETHOD(OnGetUpdateArtDIGUY)(LONG id_local, FLOAT* joints);
+	STDMETHOD(OnGetUpdateArtDIGUY)(LONG id_local, FLOAT* oris, FLOAT* trans);
 	STDMETHOD(OnPushUpdateArt)(LONG id_local, LONG id_part
 							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z
 							, DOUBLE dx, DOUBLE dy, DOUBLE dz);

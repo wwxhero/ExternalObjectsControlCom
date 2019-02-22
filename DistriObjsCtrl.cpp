@@ -421,7 +421,7 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
 	return S_OK;
 }
 
-STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* joints)
+STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* oris, FLOAT* trans)
 {
 #define NUM_JOINTS  15
 	TVector3D angles[NUM_JOINTS] = {0};//fixme: this interface is for testing only
@@ -430,16 +430,20 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* joints)
 	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
 	ATLASSERT(pObj->GetType() == eCV_AVATAR);
 	const CVED::CAvatarObj* avatar = (const CVED::CAvatarObj*)pObj;
-	unsigned int num = avatar->BFTGetJointsDiGuy(names, angles, NUM_JOINTS);
+	unsigned int num = avatar->BFTGetJointsDiGuy(names, angles, offsets, NUM_JOINTS);
 	ATLASSERT(num == NUM_JOINTS);
 	for (int i_j = 0; i_j < NUM_JOINTS; i_j ++)
 	{
 		CString strLogItem;
 		strLogItem.Format(" \n\t\t%2d:%20s\t=\t%4d\t%4d\t%4d", i_j, names[i_j], RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j));
-		FLOAT* joint = joints + i_j * 3;
-		joint[0] = angles[i_j].k;
-		joint[1] = angles[i_j].i;
-		joint[2] = angles[i_j].j;
+		FLOAT* ori = oris + i_j * 3;
+		ori[0] = angles[i_j].k;
+		ori[1] = angles[i_j].i;
+		ori[2] = angles[i_j].j;
+		FLOAT* tran = trans + i_j * 3;
+		tran[0] = offsets[i_j].i;
+		tran[1] = offsets[i_j].j;
+		tran[2] = offsets[i_j].k;
 		_AtlModule.LogEventEx(19, strLogItem);
 	}
 	return S_OK;
@@ -459,7 +463,7 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 	auto it = m_idLocal2jointAngles.find(id_local);
 	ATLASSERT(it != m_idLocal2jointAngles.end());
 	Joints joints = it->second;
-	CVED::CArtiJoints::BFTSetJoints(s, joints.angles, joints.offsets,joints.num);
+	CVED::CArtiJoints::BFTSetJoints(s, joints.angles, joints.offsets, joints.num);
 
 	s->vehicleState.vehState.position.x = xPos;
 	s->vehicleState.vehState.position.y = yPos;
