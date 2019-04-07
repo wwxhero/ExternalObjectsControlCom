@@ -4,6 +4,11 @@
 #include "DistriObjsCtrl.h"
 #include "dllmain.h"
 #include "CvedAdoCtrl.h"
+#include "dynobj.h"
+#define PI 3.1416
+
+#define RAD2DEG(r)\
+	(int)((r/PI)*180)
 
 // CDistriObjsCtrl
 extern void TaitBran2Quaternion(double i, double j, double k, double *w, double *x, double *y, double *z);
@@ -220,22 +225,35 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 							nParts);
 	_bstr_t bName(strName.c_str());
 	*name = bName;
-	Joints joints = {new TVector3D[*nParts], *nParts};
+
+	const char** names_joint = NULL;
+	unsigned int numJoints = 0;
+	const CVED::CDynObj* pDynObj = m_pCvedMsgQ->BindObjIdToClass(*id_local);
+	CVED::CArtiJoints::BFTAlloc(strName.c_str(), &names_joint, &numJoints);
+	ATLASSERT(numJoints == *nParts);
+	Joints joints = {names_joint, new TVector3D[*nParts], new TVector3D[*nParts], *nParts};
 	ATLASSERT(m_idLocal2jointAngles.find(*id_local) == m_idLocal2jointAngles.end());
 	m_idLocal2jointAngles[*id_local] = joints;
 #ifdef _DEBUG
 	CString strLog;
-
 	strLog.Format(_T("GetcrtPedTuple(%d, %s, %d")
 									_T("\n\t%f, %f, %f")
 									_T("\n\t%f, %f, %f")
 									_T("\n\t%f, %f, %f")
 									_T("\n\t%f, %f, %f")
+									_T("\n\t%d")
 									, *id_local, strName.c_str(), *solId
 									, *xSize, *ySize, *zSize
 									, *xPos, *yPos, *zPos
 									, *xTan, *yTan, *zTan
-									, *xLat, *yLat, *zLat);
+									, *xLat, *yLat, *zLat
+									, *nParts);
+	for (int i_part = 0; i_part < *nParts; i_part ++)
+	{
+		CString strPartName;
+		strPartName.Format(_T("\n\t\t%d:%s"), i_part, names_joint[i_part]);
+		strLog += strPartName;
+	}
 	_AtlModule.LogEventEx(9, strLog);
 #endif
 	return S_OK;
@@ -243,16 +261,16 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 
 STDMETHODIMP CDistriObjsCtrl::GetcrtPedPartName(LONG id_local, LONG id_part, BSTR *name_part)
 {
-	ATLASSERT(NULL != m_pCvedMsgQ);
-	std::string partName;
-	m_pCvedMsgQ->crtPedPartName(id_local, id_part, partName);
-	_bstr_t bName(partName.c_str());
+	auto it = m_idLocal2jointAngles.find(id_local);
+	ATLASSERT(it != m_idLocal2jointAngles.end());
+	Joints joints = it->second;
+	_bstr_t bName(joints.names[id_part]);
 	*name_part = bName;
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("GetcrtPedPartName(%d, %s)")
 				, id_part
-				, partName.c_str());
+				, joints.names[id_part]);
 	_AtlModule.LogEventEx(15, strLog);
 #endif
 	return S_OK;
@@ -265,8 +283,12 @@ STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
 	auto it = m_idLocal2jointAngles.find(*id_local);
 	ATLASSERT(it != m_idLocal2jointAngles.end());
 	auto joints = it->second;
+	const CVED::CDynObj* avatar = m_pCvedMsgQ->BindObjIdToClass(*id_local);
+	CVED::CArtiJoints::BFTFree(joints.names, joints.num);
 	delete [] joints.angles;
+	delete [] joints.offsets;
 	m_idLocal2jointAngles.erase(it);
+
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("GetdelPedTuple(%d)"), *id_local);
@@ -277,7 +299,8 @@ STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
 
 STDMETHODIMP CDistriObjsCtrl::PreUpdateDynamicModels(void)
 {
-	ATLASSERT(NULL != m_pExternalCtrl);
+	ATLASSERT(NULL != m_pExternalCtrl && NULL != m_pCvedMsgQ);
+	m_pCvedMsgQ->Maintainer();
 	m_pExternalCtrl->PreUpdateDynamicModels();
 #ifdef _DEBUG
 	_AtlModule.LogEventEx(11, _T("PreUpdateDynamicModels"));
@@ -300,22 +323,23 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdate(LONG id_local, VARIANT_BOOL *received
 						, DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
 {
-	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
-	cvTObjState outp;
+	cvTObjContInp* inp = NULL; //for vrlink implementation, this parameter is useless
+	cvTObjState* outp = NULL;
+	m_pCvedMsgQ->BindStateBuff(id_local, &inp, &outp);
 	ATLASSERT(NULL != m_pExternalCtrl);
-	if (*received = m_pExternalCtrl->OnGetUpdate(id_local, &inp, &outp))
+	if (*received = m_pExternalCtrl->OnGetUpdate(id_local, inp, outp))
 	{
-		*xPos = outp.vehicleState.vehState.position.x;
-		*yPos = outp.vehicleState.vehState.position.y;
-		*zPos = outp.vehicleState.vehState.position.z;
+		*xPos = outp->vehicleState.vehState.position.x;
+		*yPos = outp->vehicleState.vehState.position.y;
+		*zPos = outp->vehicleState.vehState.position.z;
 
-		*xTan = outp.vehicleState.vehState.tangent.i;
-		*yTan = outp.vehicleState.vehState.tangent.j;
-		*zTan = outp.vehicleState.vehState.tangent.k;
+		*xTan = outp->vehicleState.vehState.tangent.i;
+		*yTan = outp->vehicleState.vehState.tangent.j;
+		*zTan = outp->vehicleState.vehState.tangent.k;
 
-		*xLat = outp.vehicleState.vehState.lateral.i;
-		*yLat = outp.vehicleState.vehState.lateral.j;
-		*zLat = outp.vehicleState.vehState.lateral.k;
+		*xLat = outp->vehicleState.vehState.lateral.i;
+		*yLat = outp->vehicleState.vehState.lateral.j;
+		*zLat = outp->vehicleState.vehState.lateral.k;
 	}
 #ifdef _DEBUG
 	CString strLog;
@@ -335,29 +359,32 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 						, DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
-	cvTObjState outp;//fixme: state should come from object(id_local)
-	if (*received = m_pExternalCtrl->OnGetUpdateArt(id_local, &outp))
+	cvTObjState* outp = NULL;
+	cvTObjContInp* outInp = NULL;
+	m_pCvedMsgQ->BindStateBuff(id_local, &outInp, &outp);
+	if (*received = m_pExternalCtrl->OnGetUpdateArt(id_local, outp))
 	{
-		*xPos = outp.vehicleState.vehState.position.x;
-		*yPos = outp.vehicleState.vehState.position.y;
-		*zPos = outp.vehicleState.vehState.position.z;
+		*xPos = outp->vehicleState.vehState.position.x;
+		*yPos = outp->vehicleState.vehState.position.y;
+		*zPos = outp->vehicleState.vehState.position.z;
 
-		*xTan = outp.vehicleState.vehState.tangent.i;
-		*yTan = outp.vehicleState.vehState.tangent.j;
-		*zTan = outp.vehicleState.vehState.tangent.k;
+		*xTan = outp->vehicleState.vehState.tangent.i;
+		*yTan = outp->vehicleState.vehState.tangent.j;
+		*zTan = outp->vehicleState.vehState.tangent.k;
 
-		*xLat = outp.vehicleState.vehState.lateral.i;
-		*yLat = outp.vehicleState.vehState.lateral.j;
-		*zLat = outp.vehicleState.vehState.lateral.k;
+		*xLat = outp->vehicleState.vehState.lateral.i;
+		*yLat = outp->vehicleState.vehState.lateral.j;
+		*zLat = outp->vehicleState.vehState.lateral.k;
 
 		auto it = m_idLocal2jointAngles.find(id_local);
 		ATLASSERT(it != m_idLocal2jointAngles.end());
 		Joints joints = it->second;
-		const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
-		ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
-		static_cast<const CVED::CExternalAvatarObj*>(pObj)->BFTFillAnglesOut(joints.angles, joints.num);
+		CVED::CArtiJoints::BFTGetJoints(outp, joints.angles, joints.offsets, joints.num);
 	}
 #ifdef _DEBUG
+	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType()
+			|| cvEObjType::eCV_AVATAR == pObj->GetType());
 	CString strLog;
 	strLog.Format(_T("%s = OnPreGetUpdateArt(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
 				, *received?_T("true"):_T("false"), id_local
@@ -370,7 +397,8 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 }
 
 STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
-							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z)
+							, DOUBLE* w, DOUBLE* x, DOUBLE* y, DOUBLE* z
+							, DOUBLE* dx, DOUBLE* dy, DOUBLE* dz)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
 	auto it = m_idLocal2jointAngles.find(id_local);
@@ -380,6 +408,10 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
 	const TVector3D& tb = joints.angles[id_part];
 	TaitBran2Quaternion(tb.i, tb.j, tb.k
 					, w, x, y, z);
+	const TVector3D& delta = joints.offsets[id_part];
+	*dx = delta.i;
+	*dy = delta.j;
+	*dz = delta.k;
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("OnGetUpdateArt(%d, %d, %f, %f, %f, %f)")
@@ -389,45 +421,75 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArt(LONG id_local, LONG id_part
 	return S_OK;
 }
 
+STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* oris, FLOAT* trans)
+{
+#define NUM_JOINTS  15
+	TVector3D angles[NUM_JOINTS] = {0};//fixme: this interface is for testing only
+	TVector3D offsets[NUM_JOINTS] = {0};
+	const char* names[NUM_JOINTS] = {NULL};
+	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+	ATLASSERT(pObj->GetType() == eCV_AVATAR);
+	const CVED::CAvatarObj* avatar = (const CVED::CAvatarObj*)pObj;
+	unsigned int num = avatar->BFTGetJointsDiGuy(names, angles, offsets, NUM_JOINTS);
+	ATLASSERT(num == NUM_JOINTS);
+	for (int i_j = 0; i_j < NUM_JOINTS; i_j ++)
+	{
+		CString strLogItem;
+		strLogItem.Format(" \n\t\t%2d:%20s\t=\t%4d\t%4d\t%4d", i_j, names[i_j], RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j));
+		FLOAT* ori = oris + i_j * 3;
+		ori[0] = angles[i_j].k;
+		ori[1] = angles[i_j].i;
+		ori[2] = angles[i_j].j;
+		FLOAT* tran = trans + i_j * 3;
+		tran[0] = offsets[i_j].i;
+		tran[1] = offsets[i_j].j;
+		tran[2] = offsets[i_j].k;
+		_AtlModule.LogEventEx(19, strLogItem);
+	}
+	return S_OK;
+#undef NUM_JOINTS
+}
+
 STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 						, DOUBLE xPos, DOUBLE yPos, DOUBLE zPos
 						, DOUBLE xTan, DOUBLE yTan, DOUBLE zTan
 						, DOUBLE xLat, DOUBLE yLat, DOUBLE zLat)
 {
+	cvTObjContInp* inp = NULL; //for vrlink implementation, this parameter is useless
+	cvTObjState* s = NULL;
+
+	m_pCvedMsgQ->BindStateBuff(id_local, &inp, &s);
+
 	auto it = m_idLocal2jointAngles.find(id_local);
 	ATLASSERT(it != m_idLocal2jointAngles.end());
 	Joints joints = it->second;
+	CVED::CArtiJoints::BFTSetJoints(s, joints.angles, joints.offsets, joints.num);
 
-	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
-	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
-	static_cast<const CVED::CExternalAvatarObj*>(pObj)->BFTFillAnglesIn(joints.angles, joints.num);
+	s->avatarState.position.x = xPos;
+	s->avatarState.position.y = yPos;
+	s->avatarState.position.z = zPos;
 
-	cvTObjContInp inp; //for vrlink implementation, this parameter is useless
-	cvTObjState s = {0};
+	s->avatarState.tangent.i = xTan;
+	s->avatarState.tangent.j = yTan;
+	s->avatarState.tangent.k = zTan;
 
-	s.vehicleState.vehState.position.x = xPos;
-	s.vehicleState.vehState.position.y = yPos;
-	s.vehicleState.vehState.position.z = zPos;
-
-	s.vehicleState.vehState.tangent.i = xTan;
-	s.vehicleState.vehState.tangent.j = yTan;
-	s.vehicleState.vehState.tangent.k = zTan;
-
-	s.vehicleState.vehState.lateral.i = xLat;
-	s.vehicleState.vehState.lateral.j = yLat;
-	s.vehicleState.vehState.lateral.k = zLat;
+	s->avatarState.lateral.i = xLat;
+	s->avatarState.lateral.j = yLat;
+	s->avatarState.lateral.k = zLat;
 
 	ATLASSERT(NULL != m_pExternalCtrl);
-	m_pExternalCtrl->OnPushUpdate(id_local, &inp, &s);
+	m_pExternalCtrl->OnPushUpdateArt(id_local, s);
 
 #ifdef _DEBUG
+	const CVED::CDynObj* pObj = m_pCvedMsgQ->BindObjIdToClass(id_local);
+	ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == pObj->GetType());
 	CString strLog;
 	strLog.Format(_T("OnPostPushUpdateArt(%d, [%f, %f, %f], [%f, %f, %f], [%f, %f, %f])")
 				, id_local
 				, xPos, yPos, zPos
 				, xTan, yTan, zTan
 				, xLat, yLat, zLat);
-	_AtlModule.LogEventEx(14, strLog);
+	_AtlModule.LogEventEx(17, strLog);
 #endif
 	return S_OK;
 }
@@ -436,7 +498,8 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 
 
 STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
-							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z)
+							, DOUBLE w, DOUBLE x, DOUBLE y, DOUBLE z
+							, DOUBLE dx, DOUBLE dy, DOUBLE dz)
 {
 	ATLASSERT(NULL != m_pExternalCtrl);
 	//m_pExternalCtrl->OnPushUpdateArt();
@@ -447,11 +510,13 @@ STDMETHODIMP CDistriObjsCtrl::OnPushUpdateArt(LONG id_local, LONG id_part
 	TVector3D& tb = joints.angles[id_part];
 	Quaternion2Taitbran(w, x, y, z
 					, &tb.i, &tb.j, &tb.k);
+	TVector3D& os = joints.offsets[id_part];
+	os.i = dx; os.j = dy; os.k = dz;
 #ifdef _DEBUG
 	CString strLog;
 	strLog.Format(_T("OnPushUpdateArt(%d, %d, %f, %f, %f, %f)")
 				, id_local, id_part, w, x, y, z);
-	_AtlModule.LogEventEx(16, strLog);
+	_AtlModule.LogEventEx(18, strLog);
 #endif
 	return S_OK;
 }

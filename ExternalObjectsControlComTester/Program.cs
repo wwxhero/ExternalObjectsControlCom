@@ -9,7 +9,7 @@ namespace ExternalObjectsControlComTester
 {
     class Program
     {
-        static string s_sceneTest = "E:\\Distri_NadsMiniSim_2.2.1\\data\\Distri_TestExpsharp.scn";
+        static string s_sceneTest = "D:\\Distri_NadsMiniSim_2.2.1\\data\\Distri_TestExpsharp.scn";
         enum IMPLE { IGCOMM = 0, DISVRLINK};
         enum TERMINAL {edo_controller = 0, ado_controller, ped_controller};
         static void testCreateRelease()

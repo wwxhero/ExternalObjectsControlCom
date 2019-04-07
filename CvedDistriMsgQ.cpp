@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "CvedDistriMsgQ.h"
+#include "cvedstrc.h"
 #define INIT_BUFF_CNT 32
 #define DELTA_BUFF_CNT 32
 
@@ -29,12 +30,6 @@ void CCvedDistriMsgQ::pop()
 	//todo: pops front element
 	Param param = m_msgQ.front();
 	m_msgQ.pop_front();
-	if (crtPed == param.ParamDef.evt)
-	{
-		const CVED::CDynObj* avatar = BindObjIdToClass(param.ParamCrtPed.id_local);
-		ATLASSERT(cvEObjType::eCV_EXTERNAL_AVATAR == avatar->GetType());
-		static_cast<const CVED::CExternalAvatarObj*>(avatar)->BFTFree(param.ParamCrtPed.partNames, param.ParamCrtPed.nPart);
-	}
 }
 void CCvedDistriMsgQ::crtDynoParams(long* id_local, std::string& name, long* solId
 				, double *xSize, double *ySize, double *zSize
@@ -166,7 +161,8 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 												const CVector3D*	cpInitLat)
 {
 	//todo: record a message for creating dyn obj
-	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_AVATAR, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	cvEObjType type = (own ? eCV_EXTERNAL_AVATAR : eCV_AVATAR);
+	CVED::CDynObj* obj = CCvedDistri::CreateDynObj(cName, type, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	if (NULL != obj)
 	{
 		Param param;
@@ -187,7 +183,7 @@ CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 		param.ParamCrtPed.xLat = cpInitLat->m_i;
 		param.ParamCrtPed.yLat = cpInitLat->m_j;
 		param.ParamCrtPed.zLat = cpInitLat->m_k;
-		static_cast<CVED::CExternalAvatarObj*>(obj)->BFTAlloc(param.ParamCrtPed.name, &param.ParamCrtPed.partNames, &param.ParamCrtPed.nPart);
+		param.ParamCrtPed.nPart = CVED::CArtiJoints::GetNumParts();
 		if (m_msgQ.full())
 		{
 			m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);
@@ -240,13 +236,7 @@ void CCvedDistriMsgQ::crtPedParams(long* id_local, std::string& name, long* solI
 	*nPart = param.ParamCrtPed.nPart;
 }
 
-void CCvedDistriMsgQ::crtPedPartName(long id_local, long id_part, std::string& name)
-{
-	Param param = m_msgQ.front();
-	ATLASSERT(param.ParamDef.evt == crtPed
-		&& id_local == param.ParamCrtPed.id_local);
-	name = param.ParamCrtPed.partNames[id_part];
-}
+
 
 void CCvedDistriMsgQ::delPedParams(long* id_local)
 {
@@ -269,5 +259,34 @@ CVED::CDynObj*	CCvedDistriMsgQ::DistriCreateADO(const string&		cName,
 void		CCvedDistriMsgQ::DistriDeleteADO(CVED::CDynObj*)
 {
 	ATLASSERT(0);
+}
+
+void CCvedDistriMsgQ::BindStateBuff(long id_local, cvTObjContInp** inp, cvTObjState** s)
+{
+	TObj* pO = BindObj(id_local);
+	ATLASSERT( (		pO->type == eCV_VEHICLE
+					|| pO->type == eCV_EXTERNAL_DRIVER
+					|| pO->type == eCV_EXTERNAL_AVATAR
+					|| pO->type == eCV_AVATAR
+				)
+			&& (		pO->phase == eALIVE
+					|| pO->phase == eDYING
+				)
+			);
+
+	if( (m_pHdr->frame & 1) == 0 )
+	{
+		// even frame
+		*inp = &pO->stateBufA.contInp;
+		//currState    = pO->stateBufB.state;
+		*s = &pO->stateBufB.state;
+	}
+	else
+	{
+		// odd frame
+		*inp = &pO->stateBufB.contInp;
+		//currState    = pO->stateBufA.state;
+		*s = &pO->stateBufA.state;
+	}
 }
 
