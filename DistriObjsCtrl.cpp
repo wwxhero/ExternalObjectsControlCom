@@ -465,17 +465,17 @@ STDMETHODIMP CDistriObjsCtrl::OnPostPushUpdateArt(LONG id_local
 	Joints joints = it->second;
 	CVED::CArtiJoints::BFTSetJoints(s, joints.angles, joints.offsets, joints.num);
 
-	s->vehicleState.vehState.position.x = xPos;
-	s->vehicleState.vehState.position.y = yPos;
-	s->vehicleState.vehState.position.z = zPos;
+	s->avatarState.position.x = xPos;
+	s->avatarState.position.y = yPos;
+	s->avatarState.position.z = zPos;
 
-	s->vehicleState.vehState.tangent.i = xTan;
-	s->vehicleState.vehState.tangent.j = yTan;
-	s->vehicleState.vehState.tangent.k = zTan;
+	s->avatarState.tangent.i = xTan;
+	s->avatarState.tangent.j = yTan;
+	s->avatarState.tangent.k = zTan;
 
-	s->vehicleState.vehState.lateral.i = xLat;
-	s->vehicleState.vehState.lateral.j = yLat;
-	s->vehicleState.vehState.lateral.k = zLat;
+	s->avatarState.lateral.i = xLat;
+	s->avatarState.lateral.j = yLat;
+	s->avatarState.lateral.k = zLat;
 
 	ATLASSERT(NULL != m_pExternalCtrl);
 	m_pExternalCtrl->OnPushUpdateArt(id_local, s);
