@@ -435,7 +435,9 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* oris, FL
 	for (int i_j = 0; i_j < NUM_JOINTS; i_j ++)
 	{
 		CString strLogItem;
-		strLogItem.Format(" \n\t\t%2d:%20s\t=\t%4d\t%4d\t%4d", i_j, names[i_j], RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j));
+		strLogItem.Format(" \n\t\t%2d:%20s\t=\t[%4d\t%4d\t%4d]\t [%4.2f\t%4.2f\t%4.2f]", i_j, names[i_j]
+			, RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j)
+			, offsets[i_j].i, offsets[i_j].j, offsets[i_j].k);
 		FLOAT* ori = oris + i_j * 3;
 		ori[0] = angles[i_j].k;
 		ori[1] = angles[i_j].i;
