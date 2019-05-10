@@ -229,7 +229,7 @@ STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *s
 	const char** names_joint = NULL;
 	unsigned int numJoints = 0;
 	const CVED::CDynObj* pDynObj = m_pCvedMsgQ->BindObjIdToClass(*id_local);
-	CVED::CArtiJoints::BFTAlloc(strName.c_str(), &names_joint, &numJoints);
+	CVED::CArtiJoints::BFTAlloc(&names_joint, &numJoints);
 	ATLASSERT(numJoints == *nParts);
 	Joints joints = {names_joint, new TVector3D[*nParts], new TVector3D[*nParts], *nParts};
 	ATLASSERT(m_idLocal2jointAngles.find(*id_local) == m_idLocal2jointAngles.end());
@@ -364,17 +364,17 @@ STDMETHODIMP CDistriObjsCtrl::OnPreGetUpdateArt(LONG id_local, VARIANT_BOOL *rec
 	m_pCvedMsgQ->BindStateBuff(id_local, &outInp, &outp);
 	if (*received = m_pExternalCtrl->OnGetUpdateArt(id_local, outp))
 	{
-		*xPos = outp->vehicleState.vehState.position.x;
-		*yPos = outp->vehicleState.vehState.position.y;
-		*zPos = outp->vehicleState.vehState.position.z;
+		*xPos = outp->avatarState.position.x;
+		*yPos = outp->avatarState.position.y;
+		*zPos = outp->avatarState.position.z;
 
-		*xTan = outp->vehicleState.vehState.tangent.i;
-		*yTan = outp->vehicleState.vehState.tangent.j;
-		*zTan = outp->vehicleState.vehState.tangent.k;
+		*xTan = outp->avatarState.tangent.i;
+		*yTan = outp->avatarState.tangent.j;
+		*zTan = outp->avatarState.tangent.k;
 
-		*xLat = outp->vehicleState.vehState.lateral.i;
-		*yLat = outp->vehicleState.vehState.lateral.j;
-		*zLat = outp->vehicleState.vehState.lateral.k;
+		*xLat = outp->avatarState.lateral.i;
+		*yLat = outp->avatarState.lateral.j;
+		*zLat = outp->avatarState.lateral.k;
 
 		auto it = m_idLocal2jointAngles.find(id_local);
 		ATLASSERT(it != m_idLocal2jointAngles.end());
@@ -435,7 +435,9 @@ STDMETHODIMP CDistriObjsCtrl::OnGetUpdateArtDIGUY(LONG id_local, FLOAT* oris, FL
 	for (int i_j = 0; i_j < NUM_JOINTS; i_j ++)
 	{
 		CString strLogItem;
-		strLogItem.Format(" \n\t\t%2d:%20s\t=\t%4d\t%4d\t%4d", i_j, names[i_j], RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j));
+		strLogItem.Format(" \n\t\t%2d:%20s\t=\t[%4d\t%4d\t%4d]\t [%4.2f\t%4.2f\t%4.2f]", i_j, names[i_j]
+			, RAD2DEG(angles[i_j].k), RAD2DEG(angles[i_j].i), RAD2DEG(angles[i_j].j)
+			, offsets[i_j].i, offsets[i_j].j, offsets[i_j].k);
 		FLOAT* ori = oris + i_j * 3;
 		ori[0] = angles[i_j].k;
 		ori[1] = angles[i_j].i;
