@@ -312,8 +312,8 @@ STDMETHODIMP CDistriObjsCtrl::GetdelPedTuple(LONG *id_local)
 STDMETHODIMP CDistriObjsCtrl::PreUpdateDynamicModels(void)
 {
 	ATLASSERT(NULL != m_pExternalCtrl && NULL != m_pCvedMsgQ);
-	m_pCvedMsgQ->Maintainer();
 	m_pExternalCtrl->PreUpdateDynamicModels();
+	m_pCvedMsgQ->Maintainer();
 #ifdef _DEBUG
 	_AtlModule.LogEventEx(11, _T("PreUpdateDynamicModels"));
 #endif
