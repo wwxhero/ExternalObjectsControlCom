@@ -145,7 +145,7 @@ STDMETHODIMP CDistriObjsCtrl::QFrontEvent(EVT* evt, VARIANT_BOOL* empty)
 	}
 #ifdef _DEBUG
 	CString strLog;
-	const TCHAR* evtName[] = {"crtDyno", "delDyno", "crtPed", "delPed", "evtUndefined"};
+	const TCHAR* evtName[] = {"crtDyno", "delDyno", "crtPed", "delPed", "pegPed", "evtUndefined"};
 	const TCHAR* boolName[] = {"false", "true"};
 	strLog.Format(_T("QFrontEvent(%s, %s)"), evtName[*evt], boolName[*empty]);
 	_AtlModule.LogEventEx(5, strLog);
@@ -204,6 +204,18 @@ STDMETHODIMP CDistriObjsCtrl::GetdelDynoTuple(LONG *id_local)
 	CString strLog;
 	strLog.Format(_T("GetdelDynoTuple(%d)"), *id_local);
 	_AtlModule.LogEventEx(8, strLog);
+#endif
+	return S_OK;
+}
+
+STDMETHODIMP CDistriObjsCtrl::GetpegPedTuple(LONG *id_parent, LONG *id_child)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	m_pCvedMsgQ->pegPedParams(id_parent, id_child);
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("GetpegPedTuple(%d, %d)"), *id_parent, *id_child);
+	_AtlModule.LogEventEx(20, strLog);
 #endif
 	return S_OK;
 }

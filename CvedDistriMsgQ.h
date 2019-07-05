@@ -26,10 +26,12 @@ public:
 					, double *xLat, double *yLat, double *zLat
 					, long *nPart);
 	void delPedParams(long* id_local);
+	void pegPedParams(long* id_parent, long* id_child);
 
 	void BindStateBuff(long id_local, cvTObjContInp** inp, cvTObjState** s);
 protected:
 	virtual CVED::CDynObj* LocalCreateEDO(
+					bool				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
@@ -60,14 +62,15 @@ protected:
 					const CVector3D*	cpInitLat=0);
 
 	virtual void LocalDeletePDO(CVED::CDynObj* );
+	virtual void PegPDOs() override;
 private:
 	union Param
 	{
-		struct evtDef
+		struct ParamDef
 		{
 			EVT evt;
-		} ParamDef;
-		struct crtDyno
+		} def;
+		struct ParamCrtDyno
 		{
 			EVT evt;
 			long id_local;
@@ -77,13 +80,13 @@ private:
 			double xPos, yPos, zPos;
 			double xTan, yTan, zTan;
 			double xLat, yLat, zLat;
-		} ParamCrtDyno;
-		struct delDyno
+		} crtDyno;
+		struct ParamDelDyno
 		{
 			EVT evt;
 			long id_local;
-		} ParamDelDyno;
-		struct crtPed
+		} delDyno;
+		struct ParamCrtPed
 		{
 			EVT evt;
 			long id_local;
@@ -94,12 +97,18 @@ private:
 			double xTan, yTan, zTan;
 			double xLat, yLat, zLat;
 			unsigned int nPart;
-		} ParamCrtPed;
-		struct delPed
+		} crtPed;
+		struct ParamDelPed
 		{
 			EVT evt;
 			long id_local;
-		} ParamDelPed;
+		} delPed;
+		struct ParamPegPed
+		{
+			EVT evt;
+			long id_parent;
+			long id_child;
+		} pegPed;
 	};
 
 	boost::circular_buffer<Param> m_msgQ;
