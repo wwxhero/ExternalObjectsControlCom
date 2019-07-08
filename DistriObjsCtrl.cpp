@@ -145,7 +145,7 @@ STDMETHODIMP CDistriObjsCtrl::QFrontEvent(EVT* evt, VARIANT_BOOL* empty)
 	}
 #ifdef _DEBUG
 	CString strLog;
-	const TCHAR* evtName[] = {"crtDyno", "delDyno", "crtPed", "delPed", "pegPed", "evtUndefined"};
+	const TCHAR* evtName[] = {"crtDyno", "delDyno", "crtPed", "delPed", "pegPed", "telPed", "evtUndefined"};
 	const TCHAR* boolName[] = {"false", "true"};
 	strLog.Format(_T("QFrontEvent(%s, %s)"), evtName[*evt], boolName[*empty]);
 	_AtlModule.LogEventEx(5, strLog);
