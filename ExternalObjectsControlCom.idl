@@ -15,6 +15,7 @@ enum EVT
 	, crtPed
 	, delPed
 	, pegPed
+	, telPed
 	, evtUndefined
 };
 
@@ -71,6 +72,9 @@ interface IDistriObjsCtrl : IDispatch{
 							, [in] DOUBLE xLat, [in] DOUBLE yLat, [in] DOUBLE zLat);
 	[id(19)] HRESULT OnGetUpdateArtDIGUY([in] LONG id_local, [in, out] FLOAT* oris, [in, out] FLOAT* trans);
 	[id(20)] HRESULT GetpegPedTuple([out] LONG* id_parent, [out] LONG* id_child);
+	[id(21)] HRESULT GettelPedTuple([out] LONG* id_local, [out] DOUBLE* xPos, [out] DOUBLE* yPos, [out] DOUBLE* zPos
+							, [out] DOUBLE* xTan, [out] DOUBLE* yTan, [out] DOUBLE* zTan
+							, [out] DOUBLE* xLat, [out] DOUBLE* yLat, [out] DOUBLE* zLat);
 };
 [
 	uuid(32C477E7-84FC-4F7A-96B9-4F86FA80DEE5),

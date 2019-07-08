@@ -187,6 +187,27 @@ void CCvedDistriMsgQ::PegPDOs()
 	}
 }
 
+void CCvedDistriMsgQ::LocalTeleportPDO(CVED::CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan, const CVector3D* lat)
+{
+	Param param;
+	param.telPed.evt = telPed;
+	param.telPed.id_local = obj->GetId();
+	param.telPed.xPos = pos->m_x;
+	param.telPed.yPos = pos->m_y;
+	param.telPed.zPos = pos->m_z;
+	param.telPed.xTan = tan->m_i;
+	param.telPed.yTan = tan->m_j;
+	param.telPed.zTan = tan->m_k;
+	param.telPed.xLat = lat->m_i;
+	param.telPed.yLat = lat->m_j;
+	param.telPed.zLat = lat->m_k;
+	if (m_msgQ.full())
+	{
+		m_msgQ.resize(m_msgQ.size() + DELTA_BUFF_CNT);
+	}
+	m_msgQ.push_back(param);
+}
+
 
 CVED::CDynObj* CCvedDistriMsgQ::LocalCreatePDO( bool 				own,
 												const string&		cName,
@@ -287,6 +308,25 @@ void CCvedDistriMsgQ::pegPedParams(long* id_parent, long* id_child)
 	ATLASSERT(param.def.evt == pegPed);
 	*id_parent = param.pegPed.id_parent;
 	*id_child = param.pegPed.id_child;
+}
+
+void CCvedDistriMsgQ::telPedParams(LONG* id_local
+						, double *xPos, double *yPos, double *zPos
+						, double *xTan, double *yTan, double *zTan
+						, double *xLat, double *yLat, double *zLat)
+{
+	Param param = m_msgQ.front();
+	ATLASSERT(param.def.evt == telPed);
+	*id_local = param.telPed.id_local;
+	*xPos = param.telPed.xPos;
+	*yPos = param.telPed.yPos;
+	*zPos = param.telPed.zPos;
+	*xTan = param.telPed.xTan;
+	*yTan = param.telPed.yTan;
+	*zTan = param.telPed.zTan;
+	*xLat = param.telPed.xLat;
+	*yLat = param.telPed.yLat;
+	*zLat = param.telPed.zLat;
 }
 
 CVED::CDynObj*	CCvedDistriMsgQ::DistriCreateADO(const string&		cName,

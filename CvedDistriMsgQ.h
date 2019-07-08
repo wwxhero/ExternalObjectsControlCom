@@ -27,6 +27,10 @@ public:
 					, long *nPart);
 	void delPedParams(long* id_local);
 	void pegPedParams(long* id_parent, long* id_child);
+	void telPedParams(LONG* id_local
+					, double *xSize, double *ySize, double *zSize
+					, double *xPos, double *yPos, double *zPos
+					, double *xTan, double *yTan, double *zTan);
 
 	void BindStateBuff(long id_local, cvTObjContInp** inp, cvTObjState** s);
 protected:
@@ -63,6 +67,7 @@ protected:
 
 	virtual void LocalDeletePDO(CVED::CDynObj* );
 	virtual void PegPDOs() override;
+	virtual void LocalTeleportPDO(CVED::CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan, const CVector3D* lat) override;
 private:
 	union Param
 	{
@@ -109,6 +114,14 @@ private:
 			long id_parent;
 			long id_child;
 		} pegPed;
+		struct ParamTelPed
+		{
+			EVT evt;
+			long id_local;
+			double xPos, yPos, zPos;
+			double xTan, yTan, zTan;
+			double xLat, yLat, zLat;
+		} telPed;
 	};
 
 	boost::circular_buffer<Param> m_msgQ;

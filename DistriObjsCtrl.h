@@ -76,6 +76,10 @@ public:
 							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat,
 							LONG *nParts);
 	STDMETHOD(GetdelPedTuple)(LONG *id_local);
+	STDMETHOD(GettelPedTuple)(LONG *id_local,
+							DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos,
+							DOUBLE *xTan, DOUBLE *yTan, DOUBLE *zTan,
+							DOUBLE *xLat, DOUBLE *yLat, DOUBLE *zLat);
 	STDMETHOD(GetpegPedTuple)(LONG *id_parent, LONG *id_child);
 	STDMETHOD(PreUpdateDynamicModels)(void);
 	STDMETHOD(PostUpdateDynamicModels)(void);

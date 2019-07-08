@@ -220,6 +220,25 @@ STDMETHODIMP CDistriObjsCtrl::GetpegPedTuple(LONG *id_parent, LONG *id_child)
 	return S_OK;
 }
 
+STDMETHODIMP CDistriObjsCtrl::GettelPedTuple(LONG *id
+							, DOUBLE* xPos, DOUBLE* yPos, DOUBLE* zPos
+							, DOUBLE* xTan, DOUBLE* yTan, DOUBLE* zTan
+							, DOUBLE* xLat, DOUBLE* yLat, DOUBLE* zLat)
+{
+	ATLASSERT(NULL != m_pCvedMsgQ);
+	m_pCvedMsgQ->telPedParams(id, xPos, yPos, zPos, xTan, yTan, zTan, xLat, yLat, zLat);
+#ifdef _DEBUG
+	CString strLog;
+	strLog.Format(_T("GettelPedTuple(%d, %10.2f, %10.2f, %10.2f, %10.2f, %10.2f, %10.2f, %10.2f, %10.2f, %10.2f)")
+		, id
+		, *xPos, *yPos, *zPos
+		, *xTan, *yTan, *zTan
+		, *xLat, *yLat, *zLat);
+	_AtlModule.LogEventEx(21, strLog);
+#endif
+	return S_OK;
+}
+
 STDMETHODIMP CDistriObjsCtrl::GetcrtPedTuple(LONG *id_local, BSTR *name, LONG *solId,
 							DOUBLE *xSize, DOUBLE *ySize, DOUBLE *zSize,
 							DOUBLE *xPos, DOUBLE *yPos, DOUBLE *zPos,
